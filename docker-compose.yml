@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-astavet}
+      POSTGRES_USER: ${POSTGRES_USER:-astavet}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-astavet}
+    ports:
+      - "5432:5432"
+    volumes:
+      - astavet-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-astavet} -d ${POSTGRES_DB:-astavet}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  astavet-postgres:
+

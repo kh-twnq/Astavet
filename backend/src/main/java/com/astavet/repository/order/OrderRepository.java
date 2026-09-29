@@ -4,9 +4,11 @@ import com.astavet.entity.order.CustomerOrder;
 import com.astavet.entity.order.OrderStatus;
 import java.util.Optional;
 import java.util.UUID;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -18,6 +20,10 @@ public interface OrderRepository extends JpaRepository<CustomerOrder, UUID> {
     Optional<CustomerOrder> findByIdempotencyKey(String idempotencyKey);
 
     Optional<CustomerOrder> findOneById(UUID id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select orders from CustomerOrder orders where orders.id = :id")
+    Optional<CustomerOrder> findOneByIdForUpdate(@Param("id") UUID id);
 
     Page<CustomerOrder> findAllByOrderByCreatedAtDesc(Pageable pageable);
 

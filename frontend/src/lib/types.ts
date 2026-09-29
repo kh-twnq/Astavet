@@ -51,6 +51,10 @@ export type OrderStatus =
 
 export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
 
+export type CheckoutConfig = {
+  shippingFee: number;
+};
+
 export type Order = {
   id: string;
   orderCode: string;
@@ -77,6 +81,12 @@ export type Order = {
   history: Array<{
     previousStatus: OrderStatus | null;
     newStatus: OrderStatus;
+    changedBy: string;
+    createdAt: string;
+  }>;
+  paymentHistory: Array<{
+    previousStatus: PaymentStatus;
+    newStatus: PaymentStatus;
     changedBy: string;
     createdAt: string;
   }>;

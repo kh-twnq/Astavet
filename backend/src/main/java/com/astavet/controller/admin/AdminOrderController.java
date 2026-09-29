@@ -48,7 +48,7 @@ public class AdminOrderController {
 
     @PatchMapping("/{id}/payment-status")
     public OrderResponse updatePaymentStatus(@PathVariable UUID id,
-            @Valid @RequestBody UpdatePaymentStatusRequest request) {
-        return orderService.updatePaymentStatus(id, request.paymentStatus());
+            @Valid @RequestBody UpdatePaymentStatusRequest request, Authentication authentication) {
+        return orderService.updatePaymentStatus(id, request.paymentStatus(), authentication);
     }
 }

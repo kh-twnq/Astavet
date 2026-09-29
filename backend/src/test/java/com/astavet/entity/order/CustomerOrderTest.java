@@ -19,16 +19,36 @@ class CustomerOrderTest {
     void confirmsCodCollectionOnlyAfterDelivery() {
         CustomerOrder order = newOrder();
 
-        assertThatThrownBy(() -> order.updatePaymentStatus(PaymentStatus.PAID))
+        assertThatThrownBy(() -> order.updatePaymentStatus(PaymentStatus.PAID, "admin@example.com"))
                 .isInstanceOf(IllegalStateException.class);
 
         order.transitionTo(OrderStatus.CONFIRMED, "admin@example.com");
         order.transitionTo(OrderStatus.PACKING, "admin@example.com");
         order.transitionTo(OrderStatus.SHIPPING, "admin@example.com");
         order.transitionTo(OrderStatus.DELIVERED, "admin@example.com");
-        order.updatePaymentStatus(PaymentStatus.PAID);
+        order.updatePaymentStatus(PaymentStatus.PAID, "admin@example.com");
 
         assertThat(order.getPaymentStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(order.getPaymentHistory()).singleElement().satisfies(history -> {
+            assertThat(history.getChangedBy()).isEqualTo("admin@example.com");
+            assertThat(history.getNewStatus()).isEqualTo(PaymentStatus.PAID);
+            assertThat(history.getCreatedAt()).isNotNull();
+        });
+    }
+
+    @Test
+    void refundsOnlyAfterTheOrderIsReturned() {
+        CustomerOrder order = deliveredOrder();
+        order.updatePaymentStatus(PaymentStatus.PAID, "collector@example.com");
+
+        assertThatThrownBy(() -> order.updatePaymentStatus(PaymentStatus.REFUNDED, "admin@example.com"))
+                .isInstanceOf(IllegalStateException.class);
+
+        order.transitionTo(OrderStatus.RETURNED, "admin@example.com");
+        order.updatePaymentStatus(PaymentStatus.REFUNDED, "admin@example.com");
+
+        assertThat(order.getPaymentStatus()).isEqualTo(PaymentStatus.REFUNDED);
+        assertThat(order.getPaymentHistory()).hasSize(2);
     }
 
     private CustomerOrder deliveredOrder() {

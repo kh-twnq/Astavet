@@ -18,7 +18,8 @@ public enum OrderStatus {
             case CONFIRMED -> EnumSet.of(PACKING, CANCELLED);
             case PACKING -> EnumSet.of(SHIPPING, CANCELLED);
             case SHIPPING -> EnumSet.of(DELIVERED, RETURNED);
-            case DELIVERED, CANCELLED, RETURNED -> EnumSet.noneOf(OrderStatus.class);
+            case DELIVERED -> EnumSet.of(RETURNED);
+            case CANCELLED, RETURNED -> EnumSet.noneOf(OrderStatus.class);
         };
         return allowed.contains(target);
     }

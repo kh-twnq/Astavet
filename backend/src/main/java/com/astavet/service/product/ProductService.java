@@ -12,6 +12,8 @@ import com.astavet.mapper.product.ProductMapper;
 import com.astavet.repository.product.ProductRepository;
 import java.util.List;
 import java.util.Locale;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -78,12 +80,22 @@ public class ProductService {
                 .toList();
         product.replaceImages(images);
 
+        Set<UUID> requestedVariantIds = new HashSet<>();
+        for (VariantRequest variantRequest : request.variants()) {
+            if (variantRequest.id() != null && !requestedVariantIds.add(variantRequest.id())) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "DUPLICATE_VARIANT",
+                        "Một biến thể không thể xuất hiện nhiều lần.");
+            }
+        }
+        product.getVariants().removeIf(variant -> variant.getId() != null
+                && !requestedVariantIds.contains(variant.getId()));
+
         for (VariantRequest variantRequest : request.variants()) {
             ProductVariant variant = variantRequest.id() == null
                     ? new ProductVariant(product, variantRequest.name().trim(), variantRequest.sku().trim(),
                             variantRequest.price(), variantRequest.stockQuantity(), variantRequest.active())
                     : product.getVariants().stream()
-                            .filter(candidate -> candidate.getId().equals(variantRequest.id()))
+                            .filter(candidate -> variantRequest.id().equals(candidate.getId()))
                             .findFirst()
                             .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "INVALID_VARIANT", "Biến thể không thuộc sản phẩm."));
             if (variantRequest.id() == null) {

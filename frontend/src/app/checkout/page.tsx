@@ -1,10 +1,10 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/features/cart/cart-context";
-import { ApiError, publicApi } from "@/lib/api";
+import { ApiError, getCheckoutConfig, publicApi } from "@/lib/api";
 import { formatCurrency } from "@/lib/format";
 import type { Order } from "@/lib/types";
 
@@ -14,10 +14,17 @@ export default function CheckoutPage() {
   const idempotencyKey = useRef<string | null>(null);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [shippingFee, setShippingFee] = useState<number | null>(null);
+
+  useEffect(() => {
+    void getCheckoutConfig()
+      .then((config) => setShippingFee(config.shippingFee))
+      .catch(() => setError("Không thể tải phí giao hàng. Vui lòng thử lại."));
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (items.length === 0) return;
+    if (items.length === 0 || shippingFee === null) return;
     setSubmitting(true);
     setError("");
     const form = new FormData(event.currentTarget);
@@ -57,9 +64,9 @@ export default function CheckoutPage() {
           <label>Địa chỉ giao hàng<textarea name="address" required maxLength={500} autoComplete="street-address" placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" /></label>
           <label>Ghi chú <span>(không bắt buộc)</span><textarea name="note" maxLength={1000} placeholder="Thời gian nhận hàng hoặc lưu ý khác" /></label>
           {error && <div className="form-error" role="alert">{error}</div>}
-          <button className="button primary full" disabled={submitting}>{submitting ? "Đang tạo đơn..." : "Đặt hàng COD"}</button>
+          <button className="button primary full" disabled={submitting || shippingFee === null}>{submitting ? "Đang tạo đơn..." : "Đặt hàng COD"}</button>
         </form>
-        <aside className="order-summary"><h2>Đơn hàng</h2>{items.map((item) => <div className="checkout-line" key={item.variantId}><span>{item.productName} × {item.quantity}</span><strong>{formatCurrency(item.unitPrice * item.quantity)}</strong></div>)}<div><span>Phí giao hàng</span><span>30.000 ₫</span></div><div className="summary-total"><span>Tổng dự kiến</span><strong>{formatCurrency(subtotal + 30_000)}</strong></div><p>Giá cuối cùng được hệ thống xác minh khi tạo đơn.</p></aside>
+        <aside className="order-summary"><h2>Đơn hàng</h2>{items.map((item) => <div className="checkout-line" key={item.variantId}><span>{item.productName} × {item.quantity}</span><strong>{formatCurrency(item.unitPrice * item.quantity)}</strong></div>)}<div><span>Phí giao hàng</span><span>{shippingFee === null ? "Đang tải..." : formatCurrency(shippingFee)}</span></div><div className="summary-total"><span>Tổng dự kiến</span><strong>{shippingFee === null ? "—" : formatCurrency(subtotal + shippingFee)}</strong></div><p>Giá cuối cùng được hệ thống xác minh khi tạo đơn.</p></aside>
       </div>
     </div>
   );

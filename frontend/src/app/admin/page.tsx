@@ -25,6 +25,7 @@ const nextStatuses: Partial<Record<OrderStatus, OrderStatus[]>> = {
   CONFIRMED: ["PACKING", "CANCELLED"],
   PACKING: ["SHIPPING", "CANCELLED"],
   SHIPPING: ["DELIVERED", "RETURNED"],
+  DELIVERED: ["RETURNED"],
 };
 
 const paymentStatusLabels: Record<PaymentStatus, string> = {
@@ -38,6 +39,9 @@ export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("orders");
   const [email, setEmail] = useState("");
   const [orders, setOrders] = useState<Order[]>([]);
+  const [orderPage, setOrderPage] = useState(0);
+  const [orderTotalPages, setOrderTotalPages] = useState(0);
+  const [orderTotalElements, setOrderTotalElements] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +55,10 @@ export default function AdminPage() {
         return;
       }
       setEmail(session.email ?? "");
-      const [orderPage, productList] = await Promise.all([getAdminOrders(), getAdminProducts()]);
-      setOrders(orderPage.content);
+      const [ordersResult, productList] = await Promise.all([getAdminOrders(undefined, orderPage), getAdminProducts()]);
+      setOrders(ordersResult.content);
+      setOrderTotalPages(ordersResult.totalPages);
+      setOrderTotalElements(ordersResult.totalElements);
       setProducts(productList);
     } catch (caught) {
       if (caught instanceof ApiError && caught.status === 401) router.replace("/admin/login");
@@ -60,7 +66,7 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [orderPage, router]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => void loadData(), 0);
@@ -134,7 +140,7 @@ export default function AdminPage() {
       <div className="container">
         <div className="admin-header"><div><p className="eyebrow">AstaVet Admin</p><h1>Quản lý cửa hàng</h1><p className="admin-meta">Đăng nhập: {email}</p></div><button className="button secondary" onClick={logout}>Đăng xuất</button></div>
         {error && <div className="form-error">{error}</div>}
-        <div className="admin-tabs"><button className={tab === "orders" ? "active" : ""} onClick={() => setTab("orders")}>Đơn hàng ({orders.length})</button><button className={tab === "products" ? "active" : ""} onClick={() => setTab("products")}>Sản phẩm ({products.length})</button></div>
+        <div className="admin-tabs"><button className={tab === "orders" ? "active" : ""} onClick={() => setTab("orders")}>Đơn hàng ({orderTotalElements})</button><button className={tab === "products" ? "active" : ""} onClick={() => setTab("products")}>Sản phẩm ({products.length})</button></div>
 
         {tab === "orders" ? (
           <div className="admin-card admin-list">
@@ -144,13 +150,19 @@ export default function AdminPage() {
                 <div className="admin-list-item-head"><div><h3>{order.orderCode} · {order.customerName}</h3><p className="admin-meta">{order.phone} · {order.address} · {formatDate(order.createdAt)}</p></div><span className="status-pill">{statusLabels[order.status]}</span></div>
                 <p>{order.items.map((item) => `${item.productName} × ${item.quantity}`).join(", ")}</p>
                 <strong>{formatCurrency(order.total)} · COD · {paymentStatusLabels[order.paymentStatus]}</strong>
+                {order.paymentHistory.length > 0 && <p className="admin-meta">Thanh toán: {order.paymentHistory.map((item) => `${paymentStatusLabels[item.newStatus]} bởi ${item.changedBy} lúc ${formatDate(item.createdAt)}`).join(" · ")}</p>}
                 <div className="admin-actions">
                   {nextStatuses[order.status]?.map((status) => <button key={status} onClick={() => updateOrderStatus(order, status)}>Chuyển: {statusLabels[status]}</button>)}
                   {order.status === "DELIVERED" && order.paymentStatus === "UNPAID" && <button onClick={() => updatePaymentStatus(order, "PAID")}>Xác nhận đã thu COD</button>}
-                  {order.paymentStatus === "PAID" && <button onClick={() => updatePaymentStatus(order, "REFUNDED")}>Xác nhận hoàn tiền</button>}
+                  {order.status === "RETURNED" && order.paymentStatus === "PAID" && <button onClick={() => updatePaymentStatus(order, "REFUNDED")}>Xác nhận hoàn tiền</button>}
                 </div>
               </article>
             ))}
+            <div className="admin-actions">
+              <button disabled={orderPage === 0} onClick={() => setOrderPage((current) => current - 1)}>Trang trước</button>
+              <span>Trang {orderTotalPages === 0 ? 0 : orderPage + 1}/{orderTotalPages}</span>
+              <button disabled={orderPage + 1 >= orderTotalPages} onClick={() => setOrderPage((current) => current + 1)}>Trang sau</button>
+            </div>
           </div>
         ) : (
           <div className="admin-grid">

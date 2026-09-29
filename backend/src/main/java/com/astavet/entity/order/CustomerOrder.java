@@ -71,6 +71,10 @@ public class CustomerOrder extends BaseEntity {
     @OrderBy("createdAt asc")
     private List<OrderStatusHistory> history = new ArrayList<>();
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderBy("createdAt asc")
+    private List<PaymentStatusHistory> paymentHistory = new ArrayList<>();
+
     protected CustomerOrder() {
     }
 
@@ -104,15 +108,21 @@ public class CustomerOrder extends BaseEntity {
         history.add(new OrderStatusHistory(this, previous, nextStatus, changedBy));
     }
 
-    public void updatePaymentStatus(PaymentStatus nextPaymentStatus) {
+    public void updatePaymentStatus(PaymentStatus nextPaymentStatus, String changedBy) {
         if (paymentStatus == PaymentStatus.UNPAID
                 && nextPaymentStatus == PaymentStatus.PAID
                 && status == OrderStatus.DELIVERED) {
+            PaymentStatus previous = paymentStatus;
             paymentStatus = nextPaymentStatus;
+            paymentHistory.add(new PaymentStatusHistory(this, previous, nextPaymentStatus, changedBy));
             return;
         }
-        if (paymentStatus == PaymentStatus.PAID && nextPaymentStatus == PaymentStatus.REFUNDED) {
+        if (paymentStatus == PaymentStatus.PAID
+                && nextPaymentStatus == PaymentStatus.REFUNDED
+                && status == OrderStatus.RETURNED) {
+            PaymentStatus previous = paymentStatus;
             paymentStatus = nextPaymentStatus;
+            paymentHistory.add(new PaymentStatusHistory(this, previous, nextPaymentStatus, changedBy));
             return;
         }
         throw new IllegalStateException("Invalid payment status transition");
@@ -172,5 +182,9 @@ public class CustomerOrder extends BaseEntity {
 
     public List<OrderStatusHistory> getHistory() {
         return history;
+    }
+
+    public List<PaymentStatusHistory> getPaymentHistory() {
+        return paymentHistory;
     }
 }

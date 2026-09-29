@@ -12,6 +12,7 @@ class OrderStatusTest {
         assertThat(OrderStatus.CONFIRMED.canTransitionTo(OrderStatus.PACKING)).isTrue();
         assertThat(OrderStatus.PACKING.canTransitionTo(OrderStatus.SHIPPING)).isTrue();
         assertThat(OrderStatus.SHIPPING.canTransitionTo(OrderStatus.DELIVERED)).isTrue();
+        assertThat(OrderStatus.DELIVERED.canTransitionTo(OrderStatus.RETURNED)).isTrue();
         assertThat(OrderStatus.NEW.canTransitionTo(OrderStatus.CANCELLED)).isTrue();
         assertThat(OrderStatus.CONFIRMED.canTransitionTo(OrderStatus.CANCELLED)).isTrue();
     }

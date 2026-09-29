@@ -9,6 +9,7 @@ MVP website bán hàng dành cho AstaVet với storefront Next.js, backend Java 
 - Đặt hàng COD bằng tên, số điện thoại và địa chỉ.
 - Server tự xác minh giá, tồn kho và chống tạo đơn trùng.
 - Quản trị sản phẩm, tồn kho và trạng thái đơn hàng.
+- Quản trị nhiều hình ảnh, nhiều biến thể và phân trang đơn hàng.
 - Session admin, CSRF, CORS giới hạn origin và rate-limit cơ bản.
 
 ## Yêu cầu môi trường
@@ -58,6 +59,12 @@ Storefront chạy tại `http://localhost:3000`; trang quản trị tại `http:
 cd backend
 ./gradlew test
 
+# Integration test PostgreSQL (dùng database test riêng)
+ASTAVET_TEST_DATABASE_URL=jdbc:postgresql://localhost:5432/astavet_integration_test \
+ASTAVET_TEST_DATABASE_USERNAME=postgres \
+ASTAVET_TEST_DATABASE_PASSWORD=postgres \
+./gradlew test --tests '*IntegrationTest'
+
 cd ../frontend
 npm test
 npm run lint
@@ -73,9 +80,12 @@ Luồng trạng thái hợp lệ:
 NEW → CONFIRMED → PACKING → SHIPPING → DELIVERED
   └──────────────→ CANCELLED
 SHIPPING ─────────→ RETURNED
+DELIVERED ─────────→ RETURNED
 ```
 
 Tồn kho được giữ ngay khi đơn được tạo. Giá và tổng tiền trong trình duyệt chỉ mang tính hiển thị; backend luôn tính lại từ database trong transaction.
+Đơn hủy trước khi giao hoàn tồn kho đúng một lần. COD chỉ được xác nhận đã thu sau khi giao thành công;
+hoàn tiền chỉ được xác nhận sau khi đơn chuyển sang `RETURNED`. Mọi thay đổi thanh toán đều lưu người thực hiện và thời điểm.
 
 ## Cấu hình sản xuất
 

@@ -84,7 +84,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponse updateStatus(UUID id, OrderStatus status, Authentication authentication) {
-        CustomerOrder order = findOrder(id);
+        CustomerOrder order = findOrderForUpdate(id);
         if (!order.getStatus().canTransitionTo(status)) {
             throw new ApiException(HttpStatus.CONFLICT, "INVALID_STATUS_TRANSITION",
                     "Không thể chuyển đơn từ " + order.getStatus() + " sang " + status + ".");
@@ -98,10 +98,10 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse updatePaymentStatus(UUID id, PaymentStatus paymentStatus) {
-        CustomerOrder order = findOrder(id);
+    public OrderResponse updatePaymentStatus(UUID id, PaymentStatus paymentStatus, Authentication authentication) {
+        CustomerOrder order = findOrderForUpdate(id);
         try {
-            order.updatePaymentStatus(paymentStatus);
+            order.updatePaymentStatus(paymentStatus, authentication.getName());
         } catch (IllegalStateException exception) {
             throw new ApiException(HttpStatus.CONFLICT, "INVALID_PAYMENT_STATUS_TRANSITION",
                     "Không thể chuyển trạng thái thanh toán từ " + order.getPaymentStatus()
@@ -179,6 +179,11 @@ public class OrderService {
 
     private CustomerOrder findOrder(UUID id) {
         return orderRepository.findOneById(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "Không tìm thấy đơn hàng."));
+    }
+
+    private CustomerOrder findOrderForUpdate(UUID id) {
+        return orderRepository.findOneByIdForUpdate(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "Không tìm thấy đơn hàng."));
     }
 

@@ -1,4 +1,4 @@
-import type { PageResponse, Product, Order, OrderStatus } from "./types";
+import type { CheckoutConfig, PageResponse, Product, Order, OrderStatus } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
 
@@ -58,7 +58,7 @@ export async function adminApi<T>(path: string, init?: RequestInit): Promise<T> 
 
 export const getProducts = () => publicApi<Product[]>("/products");
 export const getProduct = (slug: string) => publicApi<Product>(`/products/${encodeURIComponent(slug)}`);
+export const getCheckoutConfig = () => publicApi<CheckoutConfig>("/checkout/config");
 export const getAdminProducts = () => adminApi<Product[]>("/admin/products");
-export const getAdminOrders = (status?: OrderStatus) =>
-  adminApi<PageResponse<Order>>(`/admin/orders?size=100${status ? `&status=${status}` : ""}`);
-
+export const getAdminOrders = (status?: OrderStatus, page = 0, size = 20) =>
+  adminApi<PageResponse<Order>>(`/admin/orders?page=${page}&size=${size}${status ? `&status=${status}` : ""}`);

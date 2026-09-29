@@ -22,6 +22,7 @@ public record OrderResponse(
         OrderStatus status,
         List<OrderItemResponse> items,
         List<StatusHistoryResponse> history,
+        List<PaymentHistoryResponse> paymentHistory,
         Instant createdAt,
         Instant updatedAt) {
 }

@@ -1,11 +1,11 @@
 package com.astavet.config;
 
-import com.astavet.auth.AdminUser;
-import com.astavet.auth.AdminUserRepository;
-import com.astavet.product.Product;
-import com.astavet.product.ProductRepository;
-import com.astavet.product.ProductStatus;
-import com.astavet.product.ProductVariant;
+import com.astavet.entity.AdminUser;
+import com.astavet.entity.Product;
+import com.astavet.entity.ProductStatus;
+import com.astavet.entity.ProductVariant;
+import com.astavet.repository.AdminUserRepository;
+import com.astavet.repository.ProductRepository;
 import java.util.List;
 import java.util.Locale;
 import org.springframework.boot.ApplicationArguments;

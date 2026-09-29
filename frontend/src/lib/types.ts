@@ -49,6 +49,8 @@ export type OrderStatus =
   | "CANCELLED"
   | "RETURNED";
 
+export type PaymentStatus = "UNPAID" | "PAID" | "REFUNDED";
+
 export type Order = {
   id: string;
   orderCode: string;
@@ -60,7 +62,7 @@ export type Order = {
   shippingFee: number;
   total: number;
   paymentMethod: "COD";
-  paymentStatus: "UNPAID" | "PAID" | "REFUNDED";
+  paymentStatus: PaymentStatus;
   status: OrderStatus;
   items: Array<{
     productId: string;
@@ -89,4 +91,3 @@ export type PageResponse<T> = {
   number: number;
   size: number;
 };
-

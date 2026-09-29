@@ -8,6 +8,7 @@ import com.astavet.dto.response.order.OrderResponse;
 import com.astavet.entity.order.CustomerOrder;
 import com.astavet.entity.order.OrderItem;
 import com.astavet.entity.order.OrderStatus;
+import com.astavet.entity.order.PaymentStatus;
 import com.astavet.entity.product.ProductStatus;
 import com.astavet.entity.product.ProductVariant;
 import com.astavet.exception.ApiException;
@@ -92,6 +93,20 @@ public class OrderService {
             releaseReservedStock(order);
         }
         order.transitionTo(status, authentication.getName());
+        orderRepository.flush();
+        return OrderMapper.toResponse(order);
+    }
+
+    @Transactional
+    public OrderResponse updatePaymentStatus(UUID id, PaymentStatus paymentStatus) {
+        CustomerOrder order = findOrder(id);
+        try {
+            order.updatePaymentStatus(paymentStatus);
+        } catch (IllegalStateException exception) {
+            throw new ApiException(HttpStatus.CONFLICT, "INVALID_PAYMENT_STATUS_TRANSITION",
+                    "Không thể chuyển trạng thái thanh toán từ " + order.getPaymentStatus()
+                            + " sang " + paymentStatus + ".");
+        }
         orderRepository.flush();
         return OrderMapper.toResponse(order);
     }

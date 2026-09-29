@@ -1,5 +1,6 @@
 package com.astavet.controller.admin;
 
+import com.astavet.dto.request.order.UpdatePaymentStatusRequest;
 import com.astavet.dto.request.order.UpdateOrderStatusRequest;
 import com.astavet.dto.response.order.OrderPageResponse;
 import com.astavet.dto.response.order.OrderResponse;
@@ -43,5 +44,11 @@ public class AdminOrderController {
     public OrderResponse updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateOrderStatusRequest request,
             Authentication authentication) {
         return orderService.updateStatus(id, request.status(), authentication);
+    }
+
+    @PatchMapping("/{id}/payment-status")
+    public OrderResponse updatePaymentStatus(@PathVariable UUID id,
+            @Valid @RequestBody UpdatePaymentStatusRequest request) {
+        return orderService.updatePaymentStatus(id, request.paymentStatus());
     }
 }

@@ -101,10 +101,21 @@ public class CustomerOrder extends BaseEntity {
         }
         OrderStatus previous = status;
         status = nextStatus;
-        if (nextStatus == OrderStatus.DELIVERED) {
-            paymentStatus = PaymentStatus.PAID;
-        }
         history.add(new OrderStatusHistory(this, previous, nextStatus, changedBy));
+    }
+
+    public void updatePaymentStatus(PaymentStatus nextPaymentStatus) {
+        if (paymentStatus == PaymentStatus.UNPAID
+                && nextPaymentStatus == PaymentStatus.PAID
+                && status == OrderStatus.DELIVERED) {
+            paymentStatus = nextPaymentStatus;
+            return;
+        }
+        if (paymentStatus == PaymentStatus.PAID && nextPaymentStatus == PaymentStatus.REFUNDED) {
+            paymentStatus = nextPaymentStatus;
+            return;
+        }
+        throw new IllegalStateException("Invalid payment status transition");
     }
 
     public UUID getId() {

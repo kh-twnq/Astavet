@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ProductForm } from "@/features/admin/product-form";
 import { adminApi, ApiError, getAdminOrders, getAdminProducts } from "@/lib/api";
 import { formatCurrency, formatDate } from "@/lib/format";
-import type { Order, OrderStatus, Product } from "@/lib/types";
+import type { Order, OrderStatus, PaymentStatus, Product } from "@/lib/types";
 
 type Session = { authenticated: boolean; email: string | null };
 type Tab = "orders" | "products";
@@ -25,6 +25,12 @@ const nextStatuses: Partial<Record<OrderStatus, OrderStatus[]>> = {
   CONFIRMED: ["PACKING", "CANCELLED"],
   PACKING: ["SHIPPING", "CANCELLED"],
   SHIPPING: ["DELIVERED", "RETURNED"],
+};
+
+const paymentStatusLabels: Record<PaymentStatus, string> = {
+  UNPAID: "Chưa thu COD",
+  PAID: "Đã thu COD",
+  REFUNDED: "Đã hoàn tiền",
 };
 
 export default function AdminPage() {
@@ -70,6 +76,18 @@ export default function AdminPage() {
       setOrders((current) => current.map((item) => item.id === updated.id ? updated : item));
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : "Không thể cập nhật đơn hàng.");
+    }
+  }
+
+  async function updatePaymentStatus(order: Order, paymentStatus: PaymentStatus) {
+    try {
+      const updated = await adminApi<Order>(`/admin/orders/${order.id}/payment-status`, {
+        method: "PATCH",
+        body: JSON.stringify({ paymentStatus }),
+      });
+      setOrders((current) => current.map((item) => item.id === updated.id ? updated : item));
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : "Không thể cập nhật trạng thái thanh toán.");
     }
   }
 
@@ -125,8 +143,12 @@ export default function AdminPage() {
               <article className="admin-list-item" key={order.id}>
                 <div className="admin-list-item-head"><div><h3>{order.orderCode} · {order.customerName}</h3><p className="admin-meta">{order.phone} · {order.address} · {formatDate(order.createdAt)}</p></div><span className="status-pill">{statusLabels[order.status]}</span></div>
                 <p>{order.items.map((item) => `${item.productName} × ${item.quantity}`).join(", ")}</p>
-                <strong>{formatCurrency(order.total)} · COD</strong>
-                <div className="admin-actions">{nextStatuses[order.status]?.map((status) => <button key={status} onClick={() => updateOrderStatus(order, status)}>Chuyển: {statusLabels[status]}</button>)}</div>
+                <strong>{formatCurrency(order.total)} · COD · {paymentStatusLabels[order.paymentStatus]}</strong>
+                <div className="admin-actions">
+                  {nextStatuses[order.status]?.map((status) => <button key={status} onClick={() => updateOrderStatus(order, status)}>Chuyển: {statusLabels[status]}</button>)}
+                  {order.status === "DELIVERED" && order.paymentStatus === "UNPAID" && <button onClick={() => updatePaymentStatus(order, "PAID")}>Xác nhận đã thu COD</button>}
+                  {order.paymentStatus === "PAID" && <button onClick={() => updatePaymentStatus(order, "REFUNDED")}>Xác nhận hoàn tiền</button>}
+                </div>
               </article>
             ))}
           </div>

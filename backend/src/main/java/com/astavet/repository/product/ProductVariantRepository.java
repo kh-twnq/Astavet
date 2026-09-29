@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 public interface ProductVariantRepository extends JpaRepository<ProductVariant, UUID> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select variant from ProductVariant variant join fetch variant.product where variant.id in :ids")
+    @Query("select variant from ProductVariant variant join fetch variant.product "
+            + "where variant.id in :ids order by variant.id")
     List<ProductVariant> findAllByIdForUpdate(@Param("ids") Collection<UUID> ids);
 }

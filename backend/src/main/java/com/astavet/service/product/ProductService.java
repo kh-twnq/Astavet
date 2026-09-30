@@ -9,10 +9,12 @@ import com.astavet.entity.product.ProductStatus;
 import com.astavet.entity.product.ProductVariant;
 import com.astavet.exception.ApiException;
 import com.astavet.mapper.product.ProductMapper;
+import com.astavet.repository.order.OrderItemRepository;
 import com.astavet.repository.product.ProductRepository;
+import com.astavet.repository.product.ProductVariantRepository;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
@@ -23,9 +25,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductVariantRepository variantRepository;
+    private final OrderItemRepository orderItemRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    public ProductService(ProductRepository productRepository, ProductVariantRepository variantRepository,
+            OrderItemRepository orderItemRepository) {
         this.productRepository = productRepository;
+        this.variantRepository = variantRepository;
+        this.orderItemRepository = orderItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -58,19 +65,21 @@ public class ProductService {
         Product product = new Product(slug, request.name().trim(), trim(request.shortDescription()),
                 trim(request.description()), request.status());
         replaceDetails(product, request);
-        return ProductMapper.toResponse(productRepository.save(product), true);
+        return ProductMapper.toResponse(productRepository.saveAndFlush(product), true);
     }
 
     @Transactional
     public ProductResponse update(UUID id, UpsertProductRequest request) {
         Product product = productRepository.findOneById(id)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "PRODUCT_NOT_FOUND", "Không tìm thấy sản phẩm."));
+        variantRepository.findAllByProductIdForUpdate(id);
         String slug = normalizeSlug(request.slug());
         if (!product.getSlug().equals(slug) && productRepository.existsBySlug(slug)) {
             throw new ApiException(HttpStatus.CONFLICT, "SLUG_EXISTS", "Đường dẫn sản phẩm đã tồn tại.");
         }
         product.update(slug, request.name().trim(), trim(request.shortDescription()), trim(request.description()), request.status());
         replaceDetails(product, request);
+        productRepository.flush();
         return ProductMapper.toResponse(product, true);
     }
 
@@ -87,6 +96,13 @@ public class ProductService {
                         "Một biến thể không thể xuất hiện nhiều lần.");
             }
         }
+        for (ProductVariant variant : product.getVariants()) {
+            if (variant.getId() != null && !requestedVariantIds.contains(variant.getId())
+                    && orderItemRepository.existsByVariantId(variant.getId())) {
+                throw new ApiException(HttpStatus.CONFLICT, "VARIANT_HAS_ORDERS",
+                        "Không thể xóa biến thể đã có đơn hàng. Hãy ngừng bán biến thể này.");
+            }
+        }
         product.getVariants().removeIf(variant -> variant.getId() != null
                 && !requestedVariantIds.contains(variant.getId()));
 
@@ -101,6 +117,10 @@ public class ProductService {
             if (variantRequest.id() == null) {
                 product.addVariant(variant);
             } else {
+                if (variantRequest.version() == null || variantRequest.version() != variant.getVersion()) {
+                    throw new ApiException(HttpStatus.CONFLICT, "STALE_VARIANT",
+                            "Biến thể đã thay đổi. Vui lòng tải lại sản phẩm trước khi lưu.");
+                }
                 variant.update(variantRequest.name().trim(), variantRequest.sku().trim(), variantRequest.price(),
                         variantRequest.stockQuantity(), variantRequest.active());
             }

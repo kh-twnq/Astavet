@@ -16,4 +16,8 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Query("select variant from ProductVariant variant join fetch variant.product "
             + "where variant.id in :ids order by variant.id")
     List<ProductVariant> findAllByIdForUpdate(@Param("ids") Collection<UUID> ids);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select variant from ProductVariant variant where variant.product.id = :productId order by variant.id")
+    List<ProductVariant> findAllByProductIdForUpdate(@Param("productId") UUID productId);
 }

@@ -102,6 +102,10 @@ public class ProductVariant extends BaseEntity {
         return stockQuantity;
     }
 
+    public long getVersion() {
+        return version;
+    }
+
     public boolean isActive() {
         return active;
     }

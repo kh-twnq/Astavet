@@ -9,6 +9,7 @@ export type ProductImage = {
 
 export type ProductVariant = {
   id: string;
+  version: number;
   name: string;
   sku: string;
   price: number;

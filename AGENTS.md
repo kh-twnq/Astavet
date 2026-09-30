@@ -60,3 +60,10 @@ The commands below are documented in README/package scripts, except the backend 
 - Admin is bootstrapped on first startup from `ADMIN_EMAIL`/`ADMIN_PASSWORD`; later environment changes do not change the stored password. Do not commit `.env`/`.env.local`; replace sample passwords before running.
 - Rate limiting currently uses memory and is unsuitable for multiple backend instances. HTTPS/secure cookies, a reverse proxy with the same origin, secrets, backups, and monitoring are production requirements in README; the repository does not provide automated deployment procedures.
 - Declared versions have not been verified through installation/build. Do not upgrade versions or decide on architectural changes merely to resolve documentation uncertainty.
+
+## Shared AI guidance
+
+- When working on Java, explicitly read `.agent/rules/README.md` relative to this repository root and only the applicable rule groups. Shared reference files are not automatically loaded by Codex.
+- AI skills and rules are maintained only in `.agent/`, including `.agent/skills/astavet-cod-validation/SKILL.md` for scoped COD validation. Read the relevant `SKILL.md` directly. Discover the project's actual JDK, framework, build and test versions; use matching primary documentation when behavior is uncertain. Keep framework guidance conditional on its presence.
+- `.agent/` is the only AI guidance directory in this workspace. Codex discovers its nine skills through user-level symlinks in `~/.agents/skills/` pointing to `.agent/skills/<skill-name>`. In Codex CLI or the IDE extension, select them with `/skills` or mention them with `$<skill-name>`. These registrations are visible across workspaces; apply each skill only within its declared scope. Resolve symlinks before reading relative rule references; maintain skill content only in `.agent/`.
+- Project conventions take precedence over optional style defaults. Apply this repository's adopted architecture; the reusable layered controller/service/repository preference is not a Java/Spring mandate.

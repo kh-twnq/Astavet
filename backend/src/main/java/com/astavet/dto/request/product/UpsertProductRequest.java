@@ -14,6 +14,6 @@ public record UpsertProductRequest(
         @Size(max = 500) String shortDescription,
         @Size(max = 20000) String description,
         @NotNull ProductStatus status,
-        List<@Valid ImageRequest> images,
-        @NotEmpty List<@Valid VariantRequest> variants) {
+        List<@NotNull @Valid ImageRequest> images,
+        @NotEmpty List<@NotNull @Valid VariantRequest> variants) {
 }

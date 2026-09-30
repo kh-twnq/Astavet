@@ -21,7 +21,7 @@ public final class ProductMapper {
         List<VariantResponse> variants = product.getVariants().stream()
                 .filter(variant -> includeInactiveVariants || variant.isActive())
                 .map(variant -> new VariantResponse(
-                        variant.getId(), variant.getName(), variant.getSku(), variant.getPrice(),
+                        variant.getId(), variant.getVersion(), variant.getName(), variant.getSku(), variant.getPrice(),
                         variant.getStockQuantity(), variant.isActive()))
                 .toList();
         return new ProductResponse(

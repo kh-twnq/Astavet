@@ -13,6 +13,7 @@ type ProductFormProps = {
 type ImageDraft = { url: string; altText: string };
 type VariantDraft = {
   id: string | null;
+  version: number | null;
   name: string;
   sku: string;
   price: number;
@@ -23,6 +24,7 @@ type VariantDraft = {
 const emptyImage = (): ImageDraft => ({ url: "", altText: "" });
 const emptyVariant = (): VariantDraft => ({
   id: null,
+  version: null,
   name: "Mặc định",
   sku: "",
   price: 0,

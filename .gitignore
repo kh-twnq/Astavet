@@ -2,10 +2,10 @@
 .env
 .idea/
 .vscode/
+.codex/
 backend/.gradle/
 backend/build/
 frontend/.next/
 frontend/node_modules/
 frontend/out/
 frontend/.env.local
-

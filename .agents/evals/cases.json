@@ -1,0 +1,63 @@
+[
+  {
+    "id": "java-stock-reservation",
+    "area": "Java inventory",
+    "seed": {
+      "path": "backend/src/main/java/com/astavet/entity/product/ProductVariant.java",
+      "find": "stockQuantity -= quantity;",
+      "replace": "stockQuantity += quantity;"
+    },
+    "prompt": "A regression makes reserving a product variant increase its stock. Fix it within the existing design, preserve invalid and insufficient quantity behavior, and verify the relevant backend tests. Report the commands actually run.",
+    "required_checks": [
+      "backend: ./gradlew test --tests 'com.astavet.entity.product.ProductVariantTest'",
+      "Review ProductVariant.reserve and its test for correct stock change and failure behavior",
+      "Review final diff for unrelated changes"
+    ]
+  },
+  {
+    "id": "cod-idempotency-retry",
+    "area": "COD order flow",
+    "seed": {
+      "path": "backend/src/main/java/com/astavet/service/order/OrderService.java",
+      "find": "orderRepository.findByIdempotencyKey(idempotencyKey)",
+      "replace": "orderRepository.findByIdempotencyKey(idempotencyKey + \"-miss\")"
+    },
+    "prompt": "A retry with the same COD idempotency key no longer finds the existing order. Fix the regression without weakening the advisory lock, stock reservation or payload conflict checks. Run safe relevant tests and report any PostgreSQL integration coverage that remains skipped.",
+    "required_checks": [
+      "backend: ./gradlew test --tests 'com.astavet.service.order.OrderServiceTest'",
+      "Review lookup and lock use of the same normalized key in OrderService.create",
+      "Report PostgreSQL integration tests as skipped unless a proven disposable target was used"
+    ]
+  },
+  {
+    "id": "checkout-api-field",
+    "area": "Backend/frontend API contract",
+    "seed": {
+      "path": "frontend/src/app/checkout/page.tsx",
+      "find": "customerName: form.get(\"customerName\"),",
+      "replace": "customerFullName: form.get(\"customerName\"),"
+    },
+    "prompt": "COD checkout sends a customer name field that the backend request DTO does not accept. Restore the shared request contract, keep Vietnamese UI text and the existing CSRF/client behavior, and verify the affected frontend checks. Report any HTTP flow that was not exercised.",
+    "required_checks": [
+      "frontend: npm test",
+      "frontend: npm run lint",
+      "frontend: npm run build",
+      "Review frontend JSON key against backend CreateOrderRequest and final diff"
+    ]
+  },
+  {
+    "id": "docs-backend-test-command",
+    "area": "Repository documentation",
+    "seed": {
+      "path": "README.md",
+      "find": "./gradlew test\n",
+      "replace": "./gradlew checkTests\n"
+    },
+    "prompt": "The README now shows an invalid backend test command. Correct the documented command and working directory using the current Gradle project configuration. Keep the PostgreSQL integration database warning accurate and report what you verified without running application tests solely for this documentation edit.",
+    "required_checks": [
+      "Review README command against backend/build.gradle and Gradle wrapper",
+      "Review final documentation diff and links",
+      "No application-test result claimed unless actually run"
+    ]
+  }
+]

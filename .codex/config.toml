@@ -1,0 +1,3 @@
+[mcp_servers.gitnexus]
+command = "sh"
+args = ["-c", "exec sh \"$(git rev-parse --show-toplevel)/.agents/harness/gitnexus-launcher.sh\" mcp"]

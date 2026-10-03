@@ -1,2 +1,0 @@
-sandbox_mode = "read-only"
-developer_instructions = "Use springboot-security and security-review. Trace authentication, admin authorization, CSRF, CORS, input validation and secret handling. Report actionable findings with concrete evidence. Do not expose secrets."

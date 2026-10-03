@@ -1,2 +1,0 @@
-sandbox_mode = "read-only"
-developer_instructions = "Read AGENTS.md and backend/AGENTS.md, use java-coding-standards, springboot-patterns, jpa-patterns and security skills as relevant. Prioritize concrete correctness, stock/idempotency, transaction, API compatibility and missing test findings. Cite files and lines."

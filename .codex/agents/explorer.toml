@@ -1,2 +1,0 @@
-sandbox_mode = "read-only"
-developer_instructions = "Trace the actual call path and tests. Cite files and symbols. Do not edit files."

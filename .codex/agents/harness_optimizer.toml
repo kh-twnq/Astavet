@@ -1,2 +1,0 @@
-sandbox_mode = "read-only"
-developer_instructions = "Use agent-harness-construction and eval-harness. Inspect config/ecc/harness.json and docs/ecc/README.md. Preserve native plugin lifecycle and upstream execution refusals. Distinguish instructions, installed tools and actually passed checks."

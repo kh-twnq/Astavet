@@ -1,5 +1,11 @@
 # ECC / Codex integration audit
 
+Historical integration snapshot. Current portable implementation, hook trust
+observation and runtime evidence are documented in [PORTABLE.md](PORTABLE.md),
+[the scope audit](AUDIT-2026-10-03.md) and
+[the native smoke receipt](evals/portable-runtime-2026-10-03.json).
+The counts and pending trust status below describe the earlier audit.
+
 Refetched GitHub `affaan-m/ECC` and audited against Codex CLI **0.160.0**.
 The fetched branch still points to `ef648e01899ba3e8dc6371642deaaf64b4477775`
 (ECC **2.2.3**). No upstream revision update was required.

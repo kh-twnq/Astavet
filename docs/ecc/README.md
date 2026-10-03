@@ -1,5 +1,9 @@
 # ECC in AstaVet
 
+AstaVet is the source workspace for a Codex harness intended for multiple
+projects. See [portable installation and adapters](PORTABLE.md) for the user-level
+core; the AstaVet configuration below is a project overlay, not the global harness.
+
 Full ECC **2.2.3** is installed and enabled through Codex's native plugin lifecycle
 as `ecc@ecc`. The installed bundle contains **293 skills, 122 rule documents,
 68 agent references**, MCP configuration and the native Codex hook manifest.
@@ -29,7 +33,7 @@ application correctness, coverage or dependency security.
 | Upstream config catalogs | `tools/ecc/config/`, `tools/ecc/manifests/`, `tools/ecc/schemas/` | Unchanged upstream stack mappings, profiles, components, modules, assets and schemas |
 | Source graph implementation | `tools/ecc/scripts/lib/agent-proximity/`, `scripts/ecc-harness.mjs` | Upstream JS/TS import graph plus a project Java import adapter |
 | Harness utilities | `tools/ecc/scripts/` | Upstream configuration audit and eval capsule/receipt tools |
-| Source integrity | `tools/ecc/manifest.json` | Commit, paths and SHA-256 hashes for 90 upstream files |
+| Source integrity | `tools/ecc/manifest.json` | Commit, paths and SHA-256 hashes for 93 upstream files |
 | Verification + CI | `scripts/verify.sh`, `.github/workflows/verify.yml` | Integrity, graph validation/tests, build/tests and disposable PostgreSQL integration |
 | Memory and acceptance criteria | `MEMORY.md`, `evals/harness.md` | Durable decisions and testable harness expectations |
 
@@ -74,8 +78,8 @@ bash scripts/verify.sh all
 node scripts/ecc-harness.mjs validate
 node scripts/ecc-harness.mjs graph --write
 node scripts/ecc-harness.mjs deps
-python3 scripts/audit-codex.py       # Read effective config, skills and hook trust
-python3 scripts/audit-codex.py --mcp # Also start configured MCP servers
+python3 scripts/audit-codex.py --project .       # Read config, skills and hook trust
+python3 scripts/audit-codex.py --project . --mcp # Also start configured MCP servers
 node tools/ecc/scripts/harness-audit.js --root . --format json
 node tools/ecc/scripts/eval-harness.js example
 ```
@@ -109,12 +113,14 @@ The repository baseline remains pinned independently of plugin updates.
 Reload/reopen Codex to use the installed full plugin and native role settings.
 **Review native hook trust in Codex**: this integration did not manufacture or
 grant hook trust. ECC's Codex hook is the upstream SessionStart bootstrap;
-Claude's hook profiles and events are not mapped onto Codex. The upstream plugin declares Chrome DevTools MCP. This project replaces only
-its launcher with `scripts/ecc-mcp.sh`, which selects an installed runtime matching
-the package engine requirement (Node ^20.19, ^22.12 or >=23). The plugin launcher
-is disabled only in this project, and `astavet-chrome-devtools` starts the same
-pinned package. Set `ASTAVET_MCP_NODE` to an executable for nonstandard Node
-installations. Startup was verified with 30 tools; browser actions were not invoked.
+Claude's hook profiles and events are not mapped onto Codex. The upstream plugin
+declares Chrome DevTools MCP. The portable user harness replaces its launcher
+globally with a compatible runtime selector and `ecc-chrome-devtools`, starting
+the same pinned package (Node ^20.19, ^22.12 or >=23). AstaVet inherits that server
+without another project launcher. Set `ECC_NODE` for a nonstandard installed Node.
+See [PORTABLE.md](PORTABLE.md) for setup on another machine. The older
+`scripts/ecc-mcp.sh` remains a standalone compatibility utility, not an active
+project server. Startup was verified with 30 tools; browser actions were not invoked.
 
 Plugin skills have runtime names such as `ecc:springboot-patterns`; the repo
 fallback is named `springboot-patterns`. These 16 pairs overlap in content, not

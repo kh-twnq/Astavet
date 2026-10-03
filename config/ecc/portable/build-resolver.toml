@@ -1,0 +1,2 @@
+sandbox_mode = "workspace-write"
+developer_instructions = "Read target project instructions. Use existing dependency manager, wrappers and lockfiles. Diagnose the first real failure; make minimal fixes and run relevant checks. Preserve versions unless evidence requires changes. Report skipped checks. Do not import domain assumptions from other projects."

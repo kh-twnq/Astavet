@@ -10,11 +10,14 @@ import selectors
 import os
 import time
 from pathlib import Path
-root=str(Path(__file__).resolve().parents[1])
 parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--project', default=os.getcwd(), help='Target project directory (defaults to current directory)')
 parser.add_argument('--mcp', action='store_true', help='Also start configured MCP servers to inspect startup status')
 args = parser.parse_args()
-p=subprocess.Popen(['codex','app-server','--strict-config','--stdio'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+root=str(Path(args.project).expanduser().resolve())
+if not Path(root).is_dir():
+ parser.error('--project must be an existing directory')
+p=subprocess.Popen(['codex','app-server','--strict-config','--stdio'],cwd=root,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
 sel=selectors.DefaultSelector();sel.register(p.stdout,selectors.EVENT_READ);buffer=b''
 def call(id,method,params):
  global buffer
@@ -30,9 +33,9 @@ def call(id,method,params):
   if sel.select(1):buffer+=os.read(p.stdout.fileno(),65536)
  raise RuntimeError('read timeout: '+method)
 try:
- call(1,'initialize',{'clientInfo':{'name':'astavet_ecc_audit','version':'1.0'},'capabilities':{'experimentalApi':True}})
+ call(1,'initialize',{'clientInfo':{'name':'codex_ecc_audit','version':'1.0'},'capabilities':{'experimentalApi':True}})
  p.stdin.write(b'{"method":"initialized"}\n');p.stdin.flush()
- report={}
+ report={'project': root}
  requests = [(2,'config/read',{'cwd':root,'includeLayers':True}),(3,'skills/list',{'cwds':[root],'forceReload':True}),(4,'hooks/list',{'cwds':[root]})]
  if args.mcp:
   requests.append((5, 'mcpServerStatus/list', {'limit': 100, 'detail': 'full'}))
@@ -54,7 +57,7 @@ try:
    for entry in r.get('data',[]):
     report[method]['entries'].append({'errors':entry.get('errors',[]),'warnings':entry.get('warnings',[]),'hooks':[ {k:h.get(k) for k in ['eventName','enabled','source','pluginId','trustStatus','sourcePath','statusMessage']} for h in entry.get('hooks',[])]})
   else:
-   report[method] = {'servers': [{k: server.get(k) for k in ['name', 'authStatus', 'runtimeStatus', 'toolsError', 'serverInfo']} | {'toolCount': len(server.get('tools', {}))} for server in r.get('data', []) if server.get('name') in ['chrome-devtools', 'astavet-chrome-devtools']]}
+   report[method] = {'servers': [{k: server.get(k) for k in ['name', 'authStatus', 'runtimeStatus', 'toolsError', 'serverInfo']} | {'toolCount': len(server.get('tools', {}))} for server in r.get('data', []) if server.get('name') in ['chrome-devtools', 'astavet-chrome-devtools', 'ecc-chrome-devtools']]}
  print(json.dumps(report,indent=2))
 finally:
  p.terminate()

@@ -469,6 +469,21 @@
       "source": "scripts/lib/eval-harness/retrospective.js",
       "destination": "tools/ecc/scripts/lib/eval-harness/retrospective.js",
       "sha256": "2008817d2f3d48e6d02932aaf86a56411cfff2ce4ec875c093855de389caa9f4"
+    },
+    {
+      "source": "rules/typescript/coding-style.md",
+      "destination": "docs/ecc/rules/typescript/coding-style.md",
+      "sha256": "cb6fbe555d700a65d466fc27377fbb66d6da0e2bcf4411656918f6a45402af1a"
+    },
+    {
+      "source": "rules/typescript/security.md",
+      "destination": "docs/ecc/rules/typescript/security.md",
+      "sha256": "86b14a5a56f4e61750ab30ca50bd264f52f90f5358303f3028d41030a4c50f18"
+    },
+    {
+      "source": "rules/typescript/testing.md",
+      "destination": "docs/ecc/rules/typescript/testing.md",
+      "sha256": "92e3d02b4fff30899bc1a2af043d74941adbf3b2c0e972d2fcd2c68c9c2ea70b"
     }
   ]
 }

@@ -8,10 +8,10 @@ case "$MODE" in
   *) echo 'Usage: bash scripts/verify.sh [ecc|backend|frontend|integration|all]' >&2; exit 2 ;;
 esac
 cd "$ROOT_DIR"
-node -e 'if (Number(process.versions.node.split(".")[0]) < 20) { console.error("Verification requires Node.js 20+; select a supported Node runtime."); process.exit(1); }'
+source "$ROOT_DIR/config/ecc/portable/node-runtime.sh"
 node scripts/check-ecc.mjs
 node scripts/ecc-harness.mjs validate
-node --test scripts/tests/ecc-harness.test.mjs
+node --test scripts/tests/*.test.mjs
 git diff --check
 
 if [[ "$MODE" == backend || "$MODE" == all ]]; then

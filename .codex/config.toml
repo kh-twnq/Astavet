@@ -36,11 +36,5 @@ config_file = "agents/security_reviewer.toml"
 description = "Review ECC routing, context efficiency, graph validity and quality gates."
 config_file = "agents/harness_optimizer.toml"
 
-# Replace the plugin launcher only in this project: system Node may be too old.
-[plugins."ecc@ecc".mcp_servers.chrome-devtools]
-enabled = false
-
-[mcp_servers.astavet-chrome-devtools]
-command = "bash"
-args = ["-c", 'exec bash "$(git rev-parse --show-toplevel)/scripts/ecc-mcp.sh"']
-startup_timeout_sec = 20
+# MCP comes from the portable user harness; no duplicate project launcher.
+# See docs/ecc/PORTABLE.md for installation on another machine.

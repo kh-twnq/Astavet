@@ -1,0 +1,131 @@
+{
+  "kind": "deterministic-tests-and-native-smoke",
+  "observedOn": "2026-10-03",
+  "codexVersion": "0.160.0",
+  "portableVersion": 1,
+  "eccRevision": "ef648e01899ba3e8dc6371642deaaf64b4477775",
+  "sourceDigests": {
+    "scripts/codex-harness.mjs": "162185059634c8bc4309d4be750f7b157108db01c35c87c2a8f22dac25c70cc9",
+    "scripts/install-codex-harness.py": "48c3d27e53b9b0145fa927ca67ffc82a268b03f875187db63b4bdb59f653e88f",
+    "scripts/audit-codex.py": "eb7ba785bc1ff03fcd93304ecbf24b94690afa99a07f065204129189935fbd71"
+  },
+  "verification": {
+    "eccRegressionTests": {
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0
+    },
+    "routerCoverage": {
+      "nodeVersion": "22.23.3",
+      "lines": 86.81,
+      "branches": 94.07,
+      "functions": 96.0,
+      "scope": "JavaScript router only; Python/application coverage not measured"
+    },
+    "shellSyntax": "passed",
+    "userConfigPersonalBytesPreserved": true,
+    "installedAssetsVerified": 18,
+    "installedAssetHashFailures": 0,
+    "independentProjectPrompt": {
+      "portableWorkflowPresent": true,
+      "projectOverlayPresent": true,
+      "astavetDomainAbsent": true
+    }
+  },
+  "projects": {
+    "java": {
+      "registeredPortableRoles": [
+        "ecc_build_resolver",
+        "ecc_explorer",
+        "ecc_reviewer"
+      ],
+      "enabledEccSkills": 328,
+      "repoSkillCount": 0,
+      "skillErrors": [],
+      "hookTrust": [
+        "trusted"
+      ],
+      "mcp": null
+    },
+    "next": {
+      "registeredPortableRoles": [
+        "ecc_build_resolver",
+        "ecc_explorer",
+        "ecc_reviewer"
+      ],
+      "enabledEccSkills": 328,
+      "repoSkillCount": 0,
+      "skillErrors": [],
+      "hookTrust": [
+        "trusted"
+      ],
+      "mcp": null
+    },
+    "unknown": {
+      "registeredPortableRoles": [
+        "ecc_build_resolver",
+        "ecc_explorer",
+        "ecc_reviewer"
+      ],
+      "enabledEccSkills": 328,
+      "repoSkillCount": 0,
+      "skillErrors": [],
+      "hookTrust": [
+        "trusted"
+      ],
+      "mcp": [
+        {
+          "name": "chrome-devtools",
+          "toolCount": 0,
+          "toolsError": null,
+          "version": null
+        },
+        {
+          "name": "ecc-chrome-devtools",
+          "toolCount": 30,
+          "toolsError": null,
+          "version": "1.10.1"
+        }
+      ]
+    },
+    "astavet": {
+      "registeredPortableRoles": [
+        "ecc_build_resolver",
+        "ecc_explorer",
+        "ecc_reviewer"
+      ],
+      "enabledEccSkills": 328,
+      "repoSkillCount": 16,
+      "skillErrors": [],
+      "hookTrust": [
+        "trusted"
+      ],
+      "mcp": [
+        {
+          "name": "chrome-devtools",
+          "toolCount": 0,
+          "toolsError": null,
+          "version": null
+        },
+        {
+          "name": "ecc-chrome-devtools",
+          "toolCount": 30,
+          "toolsError": null,
+          "version": "1.10.1"
+        }
+      ]
+    }
+  },
+  "notExecuted": [
+    "model rollouts/subagent execution",
+    "native SessionStart execution",
+    "browser actions",
+    "application tests/PostgreSQL integration",
+    "application coverage/static/CVE scans",
+    "remote CI"
+  ],
+  "limitations": [
+    "Fixture checks and native discovery are not model pass@k/pass^k or benchmark results.",
+    "No candidate containment or promotion claim; upstream isolation refusals remain."
+  ]
+}

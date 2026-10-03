@@ -1,0 +1,29 @@
+{
+  "pluginId": "ecc@ecc",
+  "version": "2.2.3",
+  "repository": "https://github.com/affaan-m/ECC",
+  "commit": "ef648e01899ba3e8dc6371642deaaf64b4477775",
+  "installation": "Codex native plugin lifecycle (user-managed cache)",
+  "verifiedInstalled": true,
+  "verifiedEnabled": true,
+  "skillCount": 293,
+  "ruleFileCount": 122,
+  "agentReferenceCount": 68,
+  "hookTrust": "untrusted (observed via Codex hooks/list; no trust granted)",
+  "mcpManifest": ".mcp.json",
+  "nativeHookManifest": "hooks/codex-hooks.json",
+  "runtimeSkillCount": 328,
+  "generatedCommandSkillCount": 35,
+  "runtimeSkillNamespace": "ecc:",
+  "auditedCodexVersion": "0.160.0",
+  "mcpVerification": {
+    "originalServer": "chrome-devtools",
+    "originalFailure": "System Node 16 does not meet package engine requirements",
+    "projectServer": "astavet-chrome-devtools",
+    "package": "chrome-devtools-mcp@1.10.1",
+    "verifiedStartup": true,
+    "toolCount": 30,
+    "runtimeSelection": "scripts/ecc-mcp.sh",
+    "browserActionsTested": false
+  }
+}

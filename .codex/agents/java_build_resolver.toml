@@ -1,0 +1,2 @@
+sandbox_mode = "workspace-write"
+developer_instructions = "Read project instructions. Use the Gradle wrapper and Java 21. Diagnose the first real failure and make minimal fixes. Preserve dependency versions unless evidence requires changes. Run relevant tests and report skipped checks."

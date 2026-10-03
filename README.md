@@ -55,6 +55,16 @@ Storefront chạy tại `http://localhost:3000`; trang quản trị tại `http:
 
 ## Kiểm tra
 
+Repo tích hợp ECC cho Codex và Java/Spring Boot. Xem [hướng dẫn ECC](docs/ecc/README.md)
+để biết nguồn, skills và các giới hạn kiểm tra. Chạy từ thư mục gốc:
+
+```bash
+bash scripts/verify.sh ecc
+bash scripts/verify.sh backend
+# Hoặc kiểm tra cả backend và frontend
+bash scripts/verify.sh all
+```
+
 ```bash
 cd backend
 ./gradlew test

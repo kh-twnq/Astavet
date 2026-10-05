@@ -2,10 +2,10 @@
 
 ## Repository Map
 
-This independent repository owns one Java 21 / Spring Boot 4.1 application, its PostgreSQL schema, and same-origin static storefront/admin interfaces. Build inside this repository with the Gradle wrapper. No frontend package manager is required.
+This independent repository owns one Java 21 / Spring Boot 4.1 application, its PostgreSQL schema, and APIs consumed by the independent React JavaScript project in `../astavet-frontend`. Build inside this repository with the Gradle wrapper; run frontend npm commands in its own repository.
 
 - `src/main/java/com/astavet/shop/`: controller/v1, DTO, domain, service interfaces/impl, repository interfaces/impl and repository-local JPA entities.
-- `src/main/resources/static/`: accessible storefront, cart, checkout, confirmation, admin and assets.
+- `../astavet-frontend/`: storefront, cart, checkout, confirmation, admin and reference assets.
 - `src/main/resources/db/migration/`: Flyway migrations; Hibernate validates schema.
 - `src/test/`: domain, API, transaction and inventory concurrency tests.
 

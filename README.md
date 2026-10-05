@@ -1,14 +1,14 @@
 # AstaVet COD shop
 
-Java 21 / Spring Boot 4.1.1 commerce MVP, with PostgreSQL, JPA, Flyway and a same-origin, responsive browser interface. No JavaScript build step or online-payment integration is needed.
+Java 21 / Spring Boot 4.1.1 commerce MVP, with PostgreSQL, JPA, Flyway and a separately built React JavaScript frontend in `../astavet-frontend`. No online-payment integration is needed.
 
-Customer flow: product catalogue/detail → server-backed bag → Australian delivery checkout → order confirmation. The initial catalogue has one product; products, cart lines and order lines support multiple products without a frontend or backend rewrite. `/admin.html` redirects unauthenticated visitors to the admin sign-in page. Admins can view customer details and line items, paginate orders, confirm, ship, mark delivered and cancel before shipment.
+Customer flow: product catalogue/detail → server-backed bag → Australian delivery checkout → order confirmation. The initial catalogue has one product; products, cart lines and order lines support multiple products without a frontend or backend rewrite. The frontend routes `/admin/login` and `/admin/orders` provide administration. Admins can view customer details and line items, paginate orders, confirm, ship, mark delivered and cancel before shipment.
 
-The design and initial product are based on [the supplied AstaVet reference](https://www.astavet.com/products/astaxanthin-200g). Its title is **AstaVet 130g**, although its URL says 200g. The seeded **AUD 49.00 price and 100 units are provisional demo data**, since the reference is sold out and does not expose a usable price. Shipping is provisionally AUD 7.95, free from AUD 100.00. The jar is a custom illustration, not official packaging photography. Confirm catalogue, fulfilment terms, taxes, branding rights and imagery before opening the shop to customers. No email notifications are sent.
+The design and initial product are based on [the supplied AstaVet reference](https://www.astavet.com/products/astaxanthin-200g). Its title is **AstaVet 130g**, although its URL says 200g. The seeded **AUD 49.00 price and 100 units are provisional demo data**, since the reference is sold out and does not expose a usable price. Shipping is provisionally AUD 7.95, free from AUD 100.00. The frontend uses reference packaging photography. Confirm catalogue, fulfilment terms, taxes, branding rights and imagery before opening the shop to customers. No email notifications are sent.
 
 ## Run
 
-Requirements: Java 21, Node 16+ for the two frontend regressions, and PostgreSQL. The Gradle wrapper downloads Gradle/dependencies on its first run.
+Requirements: Java 21 and PostgreSQL. The independent frontend requires Node 22.12+. The Gradle wrapper downloads Gradle/dependencies on its first run.
 
 ```sh
 ./gradlew check bootJar
@@ -39,7 +39,7 @@ For an isolated local Docker stack, export `DATABASE_PASSWORD` and `ADMIN_PASSWO
 docker compose up --build
 ```
 
-Open `http://localhost:8080`; administration is at `/admin.html`. Compose binds the app to localhost and defaults secure cookies to false for local HTTP. The database volume preserves data across restarts. Hosted operation requires HTTPS, secure cookies, database backups and ingress request/body limits plus rate limiting on `/login` and `/api/v1/orders`. These deployment services are outside this repository; the shop has no in-process rate limiter.
+The backend serves APIs at `http://localhost:8080`. In `../astavet-frontend`, run `API_PROXY_TARGET=http://127.0.0.1:8080 npm run dev`, then open `http://127.0.0.1:5173`; administration is at `/admin/login`. Compose binds the app to localhost and defaults secure cookies to false for local HTTP. The database volume preserves data across restarts. Hosted operation requires HTTPS, secure cookies, database backups and ingress request/body limits plus rate limiting on `/login` and `/api/v1/orders`. These deployment services are outside this repository; the shop has no in-process rate limiter.
 
 ## Server invariants
 
@@ -48,7 +48,7 @@ Open `http://localhost:8080`; administration is at `/admin.html`. Compose binds 
 - The cart row is locked before checkout; products are locked in UUID order. Inventory reservation, immutable order snapshots, audit events and cart clearing commit together. No stock is reserved by adding to a bag. Database constraints prohibit negative stock and duplicate order keys.
 - Checkout keys are scoped to the guest cart and persisted with a request hash. Simultaneous retries return one order and reserve once. Changed data with a used key gets HTTP 409. The browser saves the exact pending submission before sending it and retries it after an uncertain response, even if the cart was already cleared. A successful retry does not clear items added after the original checkout.
 - Order transitions: `PLACED → CONFIRMED → SHIPPED → DELIVERED`. Cancellation is allowed from `PLACED` or `CONFIRMED`. The admin supplies its expected state; stale requests get HTTP 409. Repeating an already applied state change is a no-op. Order locking makes cancellation restore inventory and record its audit event exactly once.
-- Guest order reads require the session's cart ownership; other sessions receive 404. Admin APIs and services require `ADMIN`. Login/logout and all writes keep Spring Security CSRF protection. Browser output is escaped and a restrictive CSP is set.
+- Guest order reads require the session's cart ownership; other sessions receive 404. Admin APIs and services require `ADMIN`. Login/logout and all writes keep Spring Security CSRF protection. The frontend escapes browser output and its production reverse proxy sets a restrictive CSP.
 - Guest ownership lives in the HTTP session. This MVP runs as one instance, or requires sticky sessions. A session expiry/restart removes customer access to its old confirmation; admins retain database access. Durable shared sessions or authenticated customer recovery can be added later without changing order ownership rules.
 - Transaction failures roll back; transient database failures return a sanitized 503. Retry checkout with the saved key and request. Logs contain order IDs/state, not customer details or checkout payloads.
 
@@ -56,6 +56,8 @@ Open `http://localhost:8080`; administration is at `/admin.html`. Compose binds 
 
 | Method | Route | Contract |
 | --- | --- | --- |
+| POST | `/login` | Form username/password and CSRF; 204 success, 401 invalid credentials |
+| POST | `/logout` | CSRF required; 204 success |
 | GET | `/api/v1/products` | Active catalogue |
 | GET | `/api/v1/csrf` | Masked session token and header name |
 | GET | `/api/v1/cart` | Session bag, current totals and fingerprint |
@@ -79,7 +81,7 @@ python3 harness/scripts/check_parity.py --installed
 python3 harness/scripts/harness.py scan
 ```
 
-`test` runs domain and full Spring/JPA/MockMvc integration tests against H2 in PostgreSQL mode, applying both real migrations and validating the schema. Critical regressions cover pricing, authentication, CSRF, ownership, idempotency, concurrent first-cart creation, last-unit competition, rollback, state transitions and concurrent cancellation. `frontendTest` runs two dependency-free Node regressions for CSRF-session initialization and exact pending-checkout replay. `check` includes both.
+`test` runs domain and full Spring/JPA/MockMvc integration tests against H2 in PostgreSQL mode, applying both real migrations and validating the schema. Critical regressions cover pricing, authentication, CSRF, ownership, idempotency, concurrent first-cart creation, last-unit competition, rollback, state transitions and concurrent cancellation. Frontend client and browser regressions run independently in `../astavet-frontend`.
 
 For the same integration suite on PostgreSQL, set `TEST_DATABASE_URL`, `TEST_DATABASE_USERNAME` and `TEST_DATABASE_PASSWORD` to a **dedicated disposable test database**, then run `./gradlew postgresTest`. Tests delete application rows between cases. The CI workflow runs H2 and PostgreSQL checks; it has not been executed remotely during implementation.
 

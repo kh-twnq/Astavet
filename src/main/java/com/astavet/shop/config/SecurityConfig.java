@@ -31,15 +31,15 @@ public class SecurityConfig {
     public SecurityFilterChain security(HttpSecurity http) throws Exception {
         http.csrf(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/admin/**", "/admin.html").hasRole("ADMIN")
-                        .requestMatchers("/", "/index.html", "/assets/**", "/api/v1/products", "/api/v1/csrf",
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/products", "/api/v1/csrf",
                                 "/api/v1/cart", "/api/v1/cart/lines", "/api/v1/orders", "/api/v1/orders/*", "/error").permitAll()
                         .anyRequest().denyAll())
-                .formLogin(login -> login.loginPage("/login.html").loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/admin.html", true).failureUrl("/login.html?error").permitAll())
-                .logout(logout -> logout.logoutSuccessUrl("/"))
-                .exceptionHandling(errors -> errors.defaultAuthenticationEntryPointFor(
-                        new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED), request -> request.getRequestURI().startsWith("/api/")))
+                .formLogin(login -> login.loginPage("/login").loginProcessingUrl("/login")
+                        .successHandler((request, response, authentication) -> response.setStatus(204))
+                        .failureHandler((request, response, exception) -> response.setStatus(401)).permitAll())
+                .logout(logout -> logout.logoutSuccessHandler((request, response, authentication) -> response.setStatus(204)))
+                .exceptionHandling(errors -> errors.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .headers(headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives(
                         "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'")));
         return http.build();

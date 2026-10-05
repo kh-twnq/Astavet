@@ -21,15 +21,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew check bootJar postgresTest
         env:
           TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/astavet_test
           TEST_DATABASE_USERNAME: astavet_test
           TEST_DATABASE_PASSWORD: isolated-ci-only
-      - run: python3 harness/scripts/harness.py doctor
-      - run: python3 harness/scripts/check_parity.py --installed
-      - run: python3 harness/scripts/harness.py scan

@@ -43,7 +43,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -74,7 +73,6 @@ class ShopIntegrationTest {
     @Test
     void browserFlowUsesServerTotalsAndProtectsOrderOwnership() throws Exception {
         MockHttpSession session = new MockHttpSession();
-        mvc.perform(get("/")).andExpect(status().isOk());
         mvc.perform(get("/api/v1/products")).andExpect(status().isOk()).andExpect(jsonPath("$[0].name").value("AstaVet 130g"));
         String bag = mvc.perform(put("/api/v1/cart/lines").session(session).with(csrf())
                 .contentType(MediaType.APPLICATION_JSON).content(json.writeValueAsString(Map.of("productId", PRODUCT, "quantity", 2))))
@@ -259,14 +257,16 @@ class ShopIntegrationTest {
     @Test
     void adminLoginAndLogoutUseCsrfProtectedSession() throws Exception {
         MockHttpSession session = new MockHttpSession();
-        mvc.perform(get("/login.html")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/csrf")).andExpect(status().isOk());
         mvc.perform(post("/login").session(session).with(csrf())
                 .param("username", "admin").param("password", "test-only-password"))
-                .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/admin.html"));
+                .andExpect(status().isNoContent());
         mvc.perform(get("/api/v1/admin/orders").session(session)).andExpect(status().isOk());
         mvc.perform(post("/logout").session(session)).andExpect(status().isForbidden());
-        mvc.perform(post("/logout").session(session).with(csrf())).andExpect(status().is3xxRedirection());
+        mvc.perform(post("/logout").session(session).with(csrf())).andExpect(status().isNoContent());
         mvc.perform(get("/api/v1/admin/orders").session(new MockHttpSession())).andExpect(status().isUnauthorized());
+        mvc.perform(post("/login").with(csrf()).param("username", "admin").param("password", "incorrect"))
+                .andExpect(status().isUnauthorized());
     }
     @Test
     void replayKeepsHistoricalPriceAndDoesNotClearNewCartItems() {

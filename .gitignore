@@ -12,3 +12,11 @@ build/
 !.env.example
 .DS_Store
 bin/
+
+/.agents/
+/.codex/
+/harness/
+/.gitnexus/
+/.claude/
+/.cursor/
+/.continue/

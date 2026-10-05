@@ -1,0 +1,7 @@
+# Project settings load after this repository is trusted.
+# Inherit model selection from the user's Codex configuration.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+[features]
+hooks = true

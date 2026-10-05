@@ -1,0 +1,1 @@
+INSERT INTO products (id, slug, name, description, price, currency, stock, active) VALUES ('00000000-0000-0000-0000-000000000001', 'astaxanthin-200g', 'AstaVet 130g', 'A daily supplement for dogs, with natural astaxanthin, beta-glucan and MOS prebiotics. For animal use only. Consult your veterinarian before use.', 49.00, 'AUD', 100, true);

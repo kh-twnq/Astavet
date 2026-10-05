@@ -1,0 +1,30 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: astavet
+      POSTGRES_USER: astavet
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U astavet -d astavet"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  shop:
+    build: .
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DATABASE_URL: jdbc:postgresql://database:5432/astavet
+      DATABASE_USERNAME: astavet
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Set DATABASE_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?Set a bcrypt ADMIN_PASSWORD_HASH}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    depends_on:
+      database:
+        condition: service_healthy
+volumes:
+  postgres-data:

@@ -1,0 +1,39 @@
+{
+  "skills": [
+    "briefing",
+    "bug-investigation",
+    "change-implementation",
+    "changelog",
+    "code-craft",
+    "code-review",
+    "commit",
+    "completion-audit",
+    "grilling",
+    "handoff",
+    "implement-task",
+    "merge-conflict-resolution",
+    "mr-feedback",
+    "release-note",
+    "review-change",
+    "review-mr",
+    "security-review",
+    "ship-task",
+    "solution-planning",
+    "spring-stack-patterns",
+    "start-task",
+    "task-scoping",
+    "test-authoring"
+  ],
+  "agents": [
+    "deep-reviewer",
+    "drafter",
+    "engineering-advisor",
+    "investigator",
+    "reviewer"
+  ],
+  "workflows": [
+    "ticket",
+    "bugfix",
+    "release"
+  ]
+}

@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: astavet
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/astavet}
+    username: ${DATABASE_USERNAME:astavet}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+  servlet:
+    session:
+      timeout: 120m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:true}
+shop:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password-hash: ${ADMIN_PASSWORD_HASH}
+logging:
+  structured:
+    format:
+      console: ecs

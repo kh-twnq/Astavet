@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: ${TEST_DATABASE_URL}
+    username: ${TEST_DATABASE_USERNAME}
+    password: ${TEST_DATABASE_PASSWORD}
+shop:
+  admin:
+    password-hash: '{noop}test-only-password'
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false

@@ -1,0 +1,14 @@
+# Codex harness local runtime
+harness/state/
+harness/profiles/local.json
+__pycache__/
+*.pyc
+.codex/config.local.toml
+.runtime/
+.gradle/
+build/
+.env
+.env.*
+!.env.example
+.DS_Store
+bin/

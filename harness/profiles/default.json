@@ -1,0 +1,45 @@
+{
+  "name": "astavet",
+  "verification": {
+    "commands": [
+      {
+        "name": "application",
+        "argv": [
+          "./gradlew",
+          "check",
+          "bootJar"
+        ],
+        "timeout_seconds": 600
+      },
+      {
+        "name": "doctor",
+        "argv": [
+          "python3",
+          "harness/scripts/harness.py",
+          "doctor"
+        ],
+        "timeout_seconds": 30
+      },
+      {
+        "name": "parity",
+        "argv": [
+          "python3",
+          "harness/scripts/check_parity.py",
+          "--installed"
+        ],
+        "timeout_seconds": 30
+      }
+    ],
+    "allow_no_tests": false
+  },
+  "vcs": {
+    "review_tool": null
+  },
+  "tracker": null,
+  "policy": {
+    "comments": "none",
+    "protected_branches": [
+      "main"
+    ]
+  }
+}

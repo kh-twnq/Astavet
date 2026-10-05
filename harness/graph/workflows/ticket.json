@@ -1,0 +1,91 @@
+{
+  "workflow": "ticket",
+  "description": "Scoped task lifecycle with dependency and evidence gates",
+  "nodes": [
+    {
+      "id": "intake",
+      "skill": "start-task",
+      "condition": "always",
+      "dependencies": [],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "analyze",
+      "skill": "task-scoping",
+      "condition": "always",
+      "dependencies": [
+        "intake"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "plan",
+      "skill": "solution-planning",
+      "condition": "always",
+      "dependencies": [
+        "analyze"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "implement",
+      "skill": "change-implementation",
+      "condition": "always",
+      "dependencies": [
+        "plan"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "integrate",
+      "skill": "change-implementation",
+      "condition": "cross_repo_contract",
+      "dependencies": [
+        "implement"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "test",
+      "skill": "test-authoring",
+      "condition": "code_change",
+      "dependencies": [
+        "implement",
+        "integrate"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "review",
+      "skill": "code-review",
+      "condition": "always",
+      "dependencies": [
+        "implement",
+        "integrate"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "security",
+      "skill": "security-review",
+      "condition": "security",
+      "dependencies": [
+        "implement",
+        "integrate"
+      ],
+      "maximum_attempts": 3
+    },
+    {
+      "id": "ship",
+      "skill": "ship-task",
+      "condition": "always",
+      "dependencies": [
+        "test",
+        "review",
+        "security",
+        "integrate"
+      ],
+      "maximum_attempts": 1
+    }
+  ]
+}

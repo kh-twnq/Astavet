@@ -15,13 +15,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RequestTraceFilter extends OncePerRequestFilter {
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        String requestId = UUID.randomUUID().toString();
-        response.setHeader("X-Request-ID", requestId);
-        MDC.put("requestId", requestId);
-        try { chain.doFilter(request, response); }
-        finally { MDC.remove("requestId"); }
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+      throws ServletException, IOException {
+    String requestId = UUID.randomUUID().toString();
+    response.setHeader("X-Request-ID", requestId);
+    MDC.put("requestId", requestId);
+    try {
+      chain.doFilter(request, response);
+    } finally {
+      MDC.remove("requestId");
     }
+  }
 }

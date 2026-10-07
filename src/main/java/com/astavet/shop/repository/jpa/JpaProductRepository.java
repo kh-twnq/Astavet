@@ -11,10 +11,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID> {
-    List<ProductEntity> findByActiveTrueAndNameContainingIgnoreCaseOrderByNameAscIdAsc(String name, org.springframework.data.domain.Pageable pageable);
-    Optional<ProductEntity> findBySlugAndActiveTrue(String slug);
-    org.springframework.data.domain.Page<ProductEntity> findAllByOrderByNameAscIdAsc(org.springframework.data.domain.Pageable pageable);
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select p from ProductEntity p where p.id = :id")
-    Optional<ProductEntity> lock(@Param("id") UUID id);
+  List<ProductEntity> findByActiveTrueAndNameContainingIgnoreCaseOrderByNameAscIdAsc(
+      String name, org.springframework.data.domain.Pageable pageable);
+
+  Optional<ProductEntity> findBySlugAndActiveTrue(String slug);
+
+  org.springframework.data.domain.Page<ProductEntity> findAllByOrderByNameAscIdAsc(
+      org.springframework.data.domain.Pageable pageable);
+
+  @Lock(LockModeType.PESSIMISTIC_WRITE)
+  @Query("select p from ProductEntity p where p.id = :id")
+  Optional<ProductEntity> lock(@Param("id") UUID id);
 }

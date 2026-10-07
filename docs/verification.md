@@ -71,3 +71,22 @@ React bootstrap stays in `main.jsx`, and application/session/route orchestration
 - Independent architecture/correctness review passes. No stale source package imports, unresolved frontend imports or entity imports in services/controllers/DTOs/domain/config. Python 3.11 doctor and installed parity pass in both repositories. Secret scans have no blockers; advisory matches in moved AccountLogin code are the `fields.password` expression and password autocomplete strings, not credentials.
 
 Pre-change source trees, instruction files and staged patches are saved locally outside both repositories in `java-backend-upstreams/backups/2026-10-07-structure/`. Existing query fixes are retained. Versions, public routes/DTOs, CSS selectors, session/storage keys, transactions and database schema are unchanged. No commit, push or deployment is performed. Temporary verification services/data are removed; remote CI and production deployment remain unverified.
+
+## Oracle/Google Java code style — 2026-10-07
+
+Task `ASTAVET-JAVA-STYLE` implements the user's request to add rules from the supplied Oracle/Sun (24 pages) and Google (22 pages) PDFs, then apply them to AstaVet. The documents were treated as reference material. [Canonical source style](../../codex/harness/rules/java-style.md) and [provenance/conflict decisions](../../codex/harness/references/java-backend/code-style-sources.md) record hashes, sections and adopted exceptions.
+
+Google controls layout: two-space blocks, 100 columns, sorted explicit imports, K&R braces and one statement per line. Compatible Oracle rules supplement naming, declarations, static access and readability. Existing no-comment/Javadoc policy, public JPA data-holder fields, Java21 records, exhaustive switches and project boundaries are explicit exceptions; no claim of full compliance with both documents is made.
+
+All 100 production/test Java files were formatted with pinned google-java-format 1.37.0. Missing control-flow braces were added in 13 files; short method parameters were clarified in 15 files and logger fields use lowerCamelCase. Request query `q` is explicitly bound by name, preserving the public API despite the internal rename. Formatting splits long constant strings without changing their values. Spring annotations, DTO components, migrations, transactions and application dependencies remain unchanged.
+
+Gradle uses an isolated formatter configuration and Java21 launcher. `javaFormat` applies formatting; `javaStyleCheck` runs dry-run/error-on-change and is required by `check`. `.editorconfig` matches Java whitespace. Braces and naming were reviewed separately: zero remaining unbraced control-flow bodies. Formatter output is not a complete style/compliance proof.
+
+Executed evidence:
+
+- `./gradlew javaFormat check bootJar` and dedicated-PostgreSQL `check bootJar postgresTest`: passed; 37 H2 tests and 37 PostgreSQL tests, no failures/errors/skips after correcting the query binding caught by the existing catalogue regression.
+- Frontend build, two existing Node client tests and four real-browser PostgreSQL flows pass. No frontend source change is needed because contracts are preserved.
+- Deliberately introduced format drift: `javaStyleCheck` failed and left source bytes unchanged; source restored afterwards. Running `javaFormat` again changed none of the 100 files, and the clean style check passed.
+- Independent deep source/build/rules review passed, comparing against the exact pre-style backup. Canonical harness regression suite: 67 tests passed; Python3.11 doctor/parity and document link checks pass.
+
+Pre-style source/build/rule files and staged patch are recoverable outside Git roots under `java-backend-upstreams/backups/2026-10-07-java-style/`; extracted PDF text is local reference data. No upstream commands/hooks/installers are activated, no framework/database upgrade is made, and no commit/push/deployment is performed. Temporary database/browser services are removed; remote CI and production-volume performance remain unverified.

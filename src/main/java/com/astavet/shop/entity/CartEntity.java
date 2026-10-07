@@ -13,9 +13,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "carts")
 public class CartEntity {
-    @Id public UUID id;
-    @jakarta.persistence.Column(length = 30) public String couponCode;
-    @ElementCollection
-    @CollectionTable(name = "cart_lines", joinColumns = @JoinColumn(name = "cart_id"))
-    public List<CartLineEntity> lines = new ArrayList<>();
+  @Id public UUID id;
+
+  @jakarta.persistence.Column(length = 30)
+  public String couponCode;
+
+  @ElementCollection
+  @CollectionTable(name = "cart_lines", joinColumns = @JoinColumn(name = "cart_id"))
+  public List<CartLineEntity> lines = new ArrayList<>();
 }

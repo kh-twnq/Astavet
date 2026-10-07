@@ -8,27 +8,74 @@ import com.astavet.shop.entity.OrderLineEntity;
 import java.util.UUID;
 
 final class OrderMapper {
-    private OrderMapper() {}
-    static Order model(OrderEntity e) {
-        return new Order(e.id, e.cartId, e.idempotencyKey, e.requestHash,
-                new Customer(e.customerName, e.email, e.phone, e.address, e.city, e.postcode, e.state),
-                e.lines.stream().map(line -> new OrderLine(line.productId, line.name, line.unitPrice, line.quantity)).toList(),
-                e.subtotal, e.shipping, e.total, e.currency, e.status, e.createdAt, e.updatedAt, e.accountId, e.couponCode, e.discount);
-    }
-    static OrderEntity entity(Order o) {
-        OrderEntity e = new OrderEntity();
-        e.id = o.id(); e.cartId = o.cartId(); e.idempotencyKey = o.idempotencyKey(); e.requestHash = o.requestHash();
-        Customer c = o.customer();
-        e.customerName = c.name(); e.email = c.email(); e.phone = c.phone(); e.address = c.address();
-        e.city = c.city(); e.postcode = c.postcode(); e.state = c.state();
-        e.subtotal = o.subtotal(); e.shipping = o.shipping(); e.total = o.total(); e.currency = o.currency();
-        e.accountId = o.accountId(); e.couponCode = o.couponCode(); e.discount = o.discount(); e.grossTotal = o.subtotal().add(o.shipping());
-        e.status = o.status(); e.createdAt = o.createdAt(); e.updatedAt = o.updatedAt();
-        o.lines().forEach(line -> {
-            OrderLineEntity item = new OrderLineEntity();
-            item.id = UUID.randomUUID(); item.productId = line.productId(); item.name = line.name();
-            item.unitPrice = line.unitPrice(); item.quantity = line.quantity(); e.lines.add(item);
-        });
-        return e;
-    }
+  private OrderMapper() {}
+
+  static Order model(OrderEntity entity) {
+    return new Order(
+        entity.id,
+        entity.cartId,
+        entity.idempotencyKey,
+        entity.requestHash,
+        new Customer(
+            entity.customerName,
+            entity.email,
+            entity.phone,
+            entity.address,
+            entity.city,
+            entity.postcode,
+            entity.state),
+        entity.lines.stream()
+            .map(line -> new OrderLine(line.productId, line.name, line.unitPrice, line.quantity))
+            .toList(),
+        entity.subtotal,
+        entity.shipping,
+        entity.total,
+        entity.currency,
+        entity.status,
+        entity.createdAt,
+        entity.updatedAt,
+        entity.accountId,
+        entity.couponCode,
+        entity.discount);
+  }
+
+  static OrderEntity entity(Order order) {
+    OrderEntity e = new OrderEntity();
+    e.id = order.id();
+    e.cartId = order.cartId();
+    e.idempotencyKey = order.idempotencyKey();
+    e.requestHash = order.requestHash();
+    Customer c = order.customer();
+    e.customerName = c.name();
+    e.email = c.email();
+    e.phone = c.phone();
+    e.address = c.address();
+    e.city = c.city();
+    e.postcode = c.postcode();
+    e.state = c.state();
+    e.subtotal = order.subtotal();
+    e.shipping = order.shipping();
+    e.total = order.total();
+    e.currency = order.currency();
+    e.accountId = order.accountId();
+    e.couponCode = order.couponCode();
+    e.discount = order.discount();
+    e.grossTotal = order.subtotal().add(order.shipping());
+    e.status = order.status();
+    e.createdAt = order.createdAt();
+    e.updatedAt = order.updatedAt();
+    order
+        .lines()
+        .forEach(
+            line -> {
+              OrderLineEntity item = new OrderLineEntity();
+              item.id = UUID.randomUUID();
+              item.productId = line.productId();
+              item.name = line.name();
+              item.unitPrice = line.unitPrice();
+              item.quantity = line.quantity();
+              e.lines.add(item);
+            });
+    return e;
+  }
 }

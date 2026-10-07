@@ -17,7 +17,12 @@ Use the existing harness ledger/graph without bypassing it; it needs a committed
 
 ## Java guidance
 
-Canonical Java conventions are maintained in `../codex/harness/rules/java.md`.
+Canonical Java conventions are maintained in `../codex/harness/rules/java.md`;
+source style is in `../codex/harness/rules/java-style.md`. Use Google two-space
+indentation, 100 columns, explicit sorted imports, one statement per line and
+required control-flow braces. Compatible Oracle practices and project exceptions
+are recorded there. Run `./gradlew javaFormat` to apply layout and
+`./gradlew javaStyleCheck` to verify it; `check` includes the read-only style gate.
 The installed `spring-stack-patterns` and `java-backend-verification` entrypoints
 reference the canonical workflows in `../codex/.agents/skills/`; load their references
 only for the affected concern. Preserve Java 21, Boot 4.1.1, JPA/PostgreSQL/Flyway,

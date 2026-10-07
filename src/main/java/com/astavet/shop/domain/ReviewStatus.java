@@ -1,2 +1,7 @@
 package com.astavet.shop.domain;
-public enum ReviewStatus { PENDING, APPROVED, REJECTED }
+
+public enum ReviewStatus {
+  PENDING,
+  APPROVED,
+  REJECTED
+}

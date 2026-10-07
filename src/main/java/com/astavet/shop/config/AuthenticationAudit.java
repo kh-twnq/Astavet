@@ -9,13 +9,20 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class AuthenticationAudit {
-    private static final Logger LOG = LoggerFactory.getLogger(AuthenticationAudit.class);
-    @EventListener
-    public void success(AuthenticationSuccessEvent event) {
-        LOG.atInfo().addKeyValue("roles", event.getAuthentication().getAuthorities().stream().map(Object::toString).toList()).log("Account signed in");
-    }
-    @EventListener
-    public void failure(AuthenticationFailureBadCredentialsEvent event) {
-        LOG.atWarn().log("Sign-in rejected");
-    }
+  private static final Logger logger = LoggerFactory.getLogger(AuthenticationAudit.class);
+
+  @EventListener
+  public void success(AuthenticationSuccessEvent event) {
+    logger
+        .atInfo()
+        .addKeyValue(
+            "roles",
+            event.getAuthentication().getAuthorities().stream().map(Object::toString).toList())
+        .log("Account signed in");
+  }
+
+  @EventListener
+  public void failure(AuthenticationFailureBadCredentialsEvent event) {
+    logger.atWarn().log("Sign-in rejected");
+  }
 }

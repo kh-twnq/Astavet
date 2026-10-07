@@ -80,6 +80,12 @@ A successful order submission or replay returns HTTP 200 with the same order ID.
 
 Admins create/edit/hide products through `/admin/products`; stock starts at zero and changes through audited adjustments with an operation UUID and expected product version. Image paths select existing frontend assets; uploads are not implemented. Historical order names/prices remain snapshots. Do not edit an applied migration.
 
+## Java code style
+
+The project combines Google formatting with compatible Oracle/Sun naming and readability practices. Use two spaces, 100 columns, explicit sorted imports and braces on control flow. Existing no-comment, persistence-layer and API conventions remain in force. [Canonical source rules](../codex/harness/rules/java-style.md) and [PDF source/conflict decisions](../codex/harness/references/java-backend/code-style-sources.md) explain the project exceptions.
+
+Run `./gradlew javaFormat` to format production/test Java, or `./gradlew javaStyleCheck` to check without modifying files. `./gradlew check` includes this format gate and existing tests. Formatter 1.37.0 is pinned separately from application dependencies and runs on Java 21; `.editorconfig` supplies matching editor settings. Naming and programming-practice rules still need code review.
+
 ## Verification
 
 ```sh

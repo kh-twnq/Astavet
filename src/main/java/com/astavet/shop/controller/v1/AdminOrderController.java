@@ -18,16 +18,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/admin/orders")
 public class AdminOrderController {
-    private final OrderService orders;
-    public AdminOrderController(OrderService orders) { this.orders = orders; }
-    @GetMapping
-    public List<OrderResponse> list(@RequestParam(defaultValue = "0") int page) {
-        return orders.list(page).stream().map(OrderResponse::from).toList();
-    }
-    @GetMapping("/{id}")
-    public OrderResponse find(@PathVariable UUID id) { return OrderResponse.from(orders.findForAdmin(id)); }
-    @PutMapping("/{id}/status")
-    public OrderResponse transition(@PathVariable UUID id, @Valid @RequestBody UpdateOrderStatusRequest request, Principal principal) {
-        return OrderResponse.from(orders.transition(id, request.expectedStatus(), request.status(), principal.getName()));
-    }
+  private final OrderService orders;
+
+  public AdminOrderController(OrderService orders) {
+    this.orders = orders;
+  }
+
+  @GetMapping
+  public List<OrderResponse> list(@RequestParam(defaultValue = "0") int page) {
+    return orders.list(page).stream().map(OrderResponse::from).toList();
+  }
+
+  @GetMapping("/{id}")
+  public OrderResponse find(@PathVariable UUID id) {
+    return OrderResponse.from(orders.findForAdmin(id));
+  }
+
+  @PutMapping("/{id}/status")
+  public OrderResponse transition(
+      @PathVariable UUID id,
+      @Valid @RequestBody UpdateOrderStatusRequest request,
+      Principal principal) {
+    return OrderResponse.from(
+        orders.transition(id, request.expectedStatus(), request.status(), principal.getName()));
+  }
 }

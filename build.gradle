@@ -43,3 +43,39 @@ tasks.register('postgresTest', Test) {
     systemProperty 'spring.profiles.active', 'postgres-test'
     shouldRunAfter test
 }
+
+configurations {
+    javaFormatter { transitive = false }
+}
+
+dependencies {
+    javaFormatter 'com.google.googlejavaformat:google-java-format:1.37.0:all-deps'
+}
+
+def javaStyleSources = files(sourceSets.collect { it.allJava })
+def configureJavaFormatter = { JavaExec task, List<String> options ->
+    task.group = 'verification'
+    task.classpath = configurations.javaFormatter
+    task.mainClass = 'com.google.googlejavaformat.java.Main'
+    task.javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(21) }
+    task.jvmArgs = ['api', 'code', 'file', 'parser', 'tree', 'util'].collect {
+        "--add-exports=jdk.compiler/com.sun.tools.javac.${it}=ALL-UNNAMED"
+    }
+    task.inputs.files(javaStyleSources)
+    task.doFirst {
+        task.args = ['--google-style', '--max-line-length=100', '--skip-javadoc-formatting'] + options +
+                javaStyleSources.files.sort { it.path }.collect { it.absolutePath }
+    }
+}
+
+tasks.register('javaFormat', JavaExec) {
+    description = 'Apply the project Google Java formatting baseline'
+    configureJavaFormatter(delegate, ['--replace'])
+}
+
+tasks.register('javaStyleCheck', JavaExec) {
+    description = 'Fail if production or test Java source needs formatting'
+    configureJavaFormatter(delegate, ['--dry-run', '--set-exit-if-changed'])
+}
+
+tasks.named('check') { dependsOn 'javaStyleCheck' }

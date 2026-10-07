@@ -18,8 +18,9 @@ public class CartRepositoryImpl implements CartRepository {
     public Cart lock(UUID id) {
         jpa.ensure(id);
         CartEntity entity = jpa.lock(id).orElseThrow();
-        return new Cart(id, entity.lines.stream().map(line -> new CartLine(line.productId, line.quantity)).toList());
+        return new Cart(id, entity.lines.stream().map(line -> new CartLine(line.productId, line.quantity)).toList(), entity.couponCode);
     }
+    @Override public void setCoupon(UUID id, String code) { jpa.findById(id).orElseThrow().couponCode = code; }
     @Override
     public void replaceLines(UUID id, List<CartLine> lines) {
         CartEntity entity = jpa.findById(id).orElseThrow();

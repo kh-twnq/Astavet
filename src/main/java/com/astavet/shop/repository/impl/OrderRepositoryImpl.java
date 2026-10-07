@@ -43,6 +43,8 @@ public class OrderRepositoryImpl implements OrderRepository {
         recordEvent(e, actor);
         return OrderMapper.model(e);
     }
+    @Override public List<Order> listByAccount(UUID accountId, int page) { return jpa.findByAccountIdOrderByCreatedAtDescIdAsc(accountId, PageRequest.of(page, 25)).stream().map(OrderMapper::model).toList(); }
+    @Override public boolean hasDelivered(UUID accountId, UUID productId) { return jpa.countDelivered(accountId, productId) > 0; }
     private void recordEvent(OrderEntity order, String actor) {
         OrderEventEntity event = new OrderEventEntity();
         event.id = UUID.randomUUID(); event.orderId = order.id;

@@ -12,4 +12,5 @@ public interface OrderService {
     List<Order> list(int page);
     Order findForAdmin(UUID orderId);
     Order transition(UUID id, OrderStatus expected, OrderStatus next, String actor);
+    List<Order> listMine(int page);
 }

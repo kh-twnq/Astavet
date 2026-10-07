@@ -9,4 +9,9 @@ public interface ProductRepository {
     Product find(UUID id);
     Product lock(UUID id);
     void setStock(UUID id, int stock);
+    List<Product> listAll(int page);
+    Product save(Product product);
+    java.util.Optional<com.astavet.shop.domain.StockAdjustment> findAdjustment(UUID id, UUID operationId);
+    com.astavet.shop.domain.StockAdjustment saveAdjustment(com.astavet.shop.domain.StockAdjustment adjustment);
+    List<com.astavet.shop.domain.StockAdjustment> adjustments(UUID id);
 }

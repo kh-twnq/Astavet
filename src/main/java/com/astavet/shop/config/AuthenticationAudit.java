@@ -12,10 +12,10 @@ public class AuthenticationAudit {
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationAudit.class);
     @EventListener
     public void success(AuthenticationSuccessEvent event) {
-        LOG.atInfo().addKeyValue("actor", event.getAuthentication().getName()).log("Administrator signed in");
+        LOG.atInfo().addKeyValue("roles", event.getAuthentication().getAuthorities().stream().map(Object::toString).toList()).log("Account signed in");
     }
     @EventListener
     public void failure(AuthenticationFailureBadCredentialsEvent event) {
-        LOG.atWarn().log("Administrator sign-in rejected");
+        LOG.atWarn().log("Sign-in rejected");
     }
 }

@@ -9,4 +9,5 @@ public interface CartService {
     Quote setQuantity(UUID id, UUID productId, int quantity);
     Cart lock(UUID id);
     void clear(UUID id);
+    Quote setCoupon(UUID id, String code);
 }

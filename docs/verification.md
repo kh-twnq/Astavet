@@ -30,3 +30,15 @@ Backend task `ASTAVET-FRONTEND` has intake/analyze/plan/implement evidence in th
 ## Unverified or provisional
 
 Docker/Nginx containers, TLS ingress and remote CI have not been executed here. Prices, initial stock and shipping remain provisional demo values. Browser tests use isolated local preview data and leave cancelled test-order audit records. Production needs configured database/admin secrets and its deployment services. The frontend is a separate build/project while browser API requests intentionally share its reverse-proxy origin for session/CSRF correctness.
+
+## Feature extension — 2026-10-07
+
+Task `ASTAVET-EXTEND` adds catalogue/stock administration, registered accounts and order history, persisted wishlist, verified-delivery moderated reviews and fixed-AUD coupons. Both repository bases now exist as user-created commits; changes in this task remain uncommitted.
+
+- `./gradlew test postgresTest bootJar`: passed; 34 tests on H2 and the same 34 on isolated PostgreSQL, zero failures/errors. V3 applies and schema validates. Legacy preview order totals before/after V3 were compared byte-for-byte and preserved.
+- Frontend `npm test`: two client tests passed; `npm run build`: passed. Three Playwright tests pass against real PostgreSQL/backend, including product creation/hiding, exact stock retry after dropped response, registration/login with delayed refresh, wishlist persistence, discounted COD purchase, delivery, review moderation and order recovery in a new browser.
+- Critical backend regressions cover account ownership across same-session account switches, stale product/review edits, stock retry/concurrency, coupon last-use competition and rollback, minimum/expiry/discount limits, verified purchase checks, CSRF/roles and consistent account/product locking across wishlist and checkout.
+- Independent review findings were fixed: account-owned confirmations/replays require account ID even when cart matches; moderation includes review version; login and wishlist responses respect auth changes; explicit Java imports and stock response DTOs preserve repository boundaries.
+- GitNexus remains unavailable. Manual impact traced migration/entity/repository/domain/service/controller DTO changes through React API consumers. Both repositories register the same API contract and task in the installed harness. Snapshot verification, workspace integration, graph review/security and secret scans are recorded locally after staging. No ship/release is attempted.
+
+This section supersedes the earlier unborn-frontend graph limitation. Remote CI, deployment/TLS, email/SMS, carrier APIs, password recovery and image uploads remain unverified or unimplemented. Test services are shut down after verification.

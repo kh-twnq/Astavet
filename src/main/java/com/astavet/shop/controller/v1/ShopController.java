@@ -1,6 +1,7 @@
 package com.astavet.shop.controller.v1;
 
 import com.astavet.shop.dto.CartResponse;
+import com.astavet.shop.dto.SetCouponRequest;
 import com.astavet.shop.dto.CreateOrderRequest;
 import com.astavet.shop.dto.OrderResponse;
 import com.astavet.shop.dto.ProductResponse;
@@ -41,6 +42,9 @@ public class ShopController {
     @PutMapping("/cart/lines")
     public CartResponse quantity(HttpSession session, @Valid @RequestBody SetCartQuantityRequest request) {
         return CartResponse.from(carts.setQuantity(identity.cartId(session), request.productId(), request.quantity()));
+    }
+    @PutMapping("/cart/coupon") public CartResponse coupon(HttpSession session, @Valid @RequestBody SetCouponRequest request) {
+        return CartResponse.from(carts.setCoupon(identity.cartId(session), request.code()));
     }
     @PostMapping("/orders")
     public OrderResponse place(HttpSession session, @Valid @RequestBody CreateOrderRequest request) {

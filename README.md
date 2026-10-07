@@ -49,7 +49,7 @@ The backend serves APIs at `http://localhost:8080`. In `../astavet-frontend`, ru
 - Checkout keys are scoped to the guest cart and persisted with a request hash. Simultaneous retries return one order and reserve once. Changed data with a used key gets HTTP 409. The browser saves the exact pending submission before sending it and retries it after an uncertain response, even if the cart was already cleared. A successful retry does not clear items added after the original checkout.
 - Order transitions: `PLACED → CONFIRMED → SHIPPED → DELIVERED`. Cancellation is allowed from `PLACED` or `CONFIRMED`. The admin supplies its expected state; stale requests get HTTP 409. Repeating an already applied state change is a no-op. Order locking makes cancellation restore inventory and record its audit event exactly once.
 - Guest order reads require the session's cart ownership; other sessions receive 404. Admin APIs and services require `ADMIN`. Login/logout and all writes keep Spring Security CSRF protection. The frontend escapes browser output and its production reverse proxy sets a restrictive CSP.
-- Guest ownership lives in the HTTP session. This MVP runs as one instance, or requires sticky sessions. A session expiry/restart removes customer access to its old confirmation; admins retain database access. Durable shared sessions or authenticated customer recovery can be added later without changing order ownership rules.
+- Guest ownership lives in the HTTP session. This MVP runs as one instance, or requires sticky sessions. A session expiry/restart removes guest access to old confirmations. Registered customers recover account-owned orders after signing in; ownership follows account ID, never delivery email or a shared cart.
 - Transaction failures roll back; transient database failures return a sanitized 503. Retry checkout with the saved key and request. Logs contain order IDs/state, not customer details or checkout payloads.
 
 ## API
@@ -70,7 +70,7 @@ The backend serves APIs at `http://localhost:8080`. In `../astavet-frontend`, ru
 
 A successful order submission or replay returns HTTP 200 with the same order ID. Validation failures return 400, conflicts 409, missing/inaccessible resources 404, and transient database failures 503.
 
-Add products through a new reviewed Flyway migration, supplying a unique UUID/slug, name, description, AUD price, stock and active flag. Historical order names/prices remain snapshots. Do not edit an applied migration. Product editing and catalogue image uploads are outside this MVP.
+Admins create/edit/hide products through `/admin/products`; stock starts at zero and changes through audited adjustments with an operation UUID and expected product version. Image paths select existing frontend assets; uploads are not implemented. Historical order names/prices remain snapshots. Do not edit an applied migration.
 
 ## Verification
 
@@ -81,8 +81,19 @@ python3 harness/scripts/check_parity.py --installed
 python3 harness/scripts/harness.py scan
 ```
 
-`test` runs domain and full Spring/JPA/MockMvc integration tests against H2 in PostgreSQL mode, applying both real migrations and validating the schema. Critical regressions cover pricing, authentication, CSRF, ownership, idempotency, concurrent first-cart creation, last-unit competition, rollback, state transitions and concurrent cancellation. Frontend client and browser regressions run independently in `../astavet-frontend`.
+`test` runs domain and full Spring/JPA/MockMvc integration tests against H2 in PostgreSQL mode, applying all real migrations and validating the schema. Critical regressions cover pricing, authentication, CSRF, ownership, idempotency, concurrent first-cart creation, last-unit competition, rollback, state transitions and concurrent cancellation. Frontend client and browser regressions run independently in `../astavet-frontend`.
 
 For the same integration suite on PostgreSQL, set `TEST_DATABASE_URL`, `TEST_DATABASE_USERNAME` and `TEST_DATABASE_PASSWORD` to a **dedicated disposable test database**, then run `./gradlew postgresTest`. Tests delete application rows between cases. The CI workflow runs H2 and PostgreSQL checks; it has not been executed remotely during implementation.
 
 See [verification evidence](docs/verification.md) for the actual checks and environment limitations from this implementation. The installed harness remains authoritative. Do not claim ledger/graph readiness without a committed base and snapshot-bound verification.
+
+## Accounts, catalogue and community
+
+- `POST /api/v1/accounts` registers an account; `/login` accepts its email and password. Passwords require 12 characters and at most 72 UTF-8 bytes and use bcrypt. `GET /api/v1/session` reports role and safe account details. `GET /api/v1/account/orders` returns account-owned history.
+- `GET/POST /api/v1/admin/products`, product updates and stock adjustments support a growing catalogue. Product versions reject stale edits; inventory changes record actor, reason and resulting stock. Exact adjustment retries apply once.
+- `GET/PUT /api/v1/account/wishlist` persists up to 100 saved products per account.
+- Product review reads expose approved reviews only. Account review writes require a delivered purchase; edits return to pending moderation. Admin review decisions validate status and version to prevent approval of a changed body.
+- Admin coupon APIs configure fixed AUD discounts, minimum merchandise subtotal, expiry, usage limit and enabled state. Cart coupon application/removal quotes server totals. Shipping eligibility uses the subtotal before discounts; discounts never exceed merchandise subtotal. Invalid coupons remain removable and block checkout.
+- Checkout locks cart, account when authenticated, ordered product rows and coupon; stock and coupon redemption commit atomically. An exact order replay does not redeem again. Cancellation restores stock but does not restore coupon usage.
+
+Email/SMS notifications, email verification/password recovery, carrier integrations and image uploads remain future work. No external provider is configured. Payment remains COD only.

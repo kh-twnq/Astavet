@@ -19,5 +19,6 @@ public class ProductEntity {
     @Column(nullable = false, length = 3) public String currency;
     public int stock;
     public boolean active;
+    @Column(nullable = false, length = 300) public String imagePath = "/assets/product-placeholder.svg";
     @Version public long version;
 }

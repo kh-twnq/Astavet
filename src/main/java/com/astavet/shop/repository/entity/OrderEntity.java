@@ -40,6 +40,10 @@ public class OrderEntity {
     @Column(nullable = false, length = 20) public OrderStatus status;
     @Column(nullable = false) public Instant createdAt;
     @Column(nullable = false) public Instant updatedAt;
+    public UUID accountId;
+    @Column(length = 30) public String couponCode;
+    @Column(nullable = false, precision = 12, scale = 2) public BigDecimal discount;
+    @Column(nullable = false, precision = 12, scale = 2) public BigDecimal grossTotal;
     @Version public long version;
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "order_id", nullable = false)

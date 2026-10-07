@@ -12,6 +12,8 @@ import com.astavet.shop.domain.Quote;
 import com.astavet.shop.domain.ShopException;
 import com.astavet.shop.repository.OrderRepository;
 import com.astavet.shop.service.CartService;
+import com.astavet.shop.service.AccountService;
+import com.astavet.shop.service.CouponService;
 import com.astavet.shop.service.OrderService;
 import com.astavet.shop.service.ProductService;
 import com.astavet.shop.service.QuoteService;
@@ -33,8 +35,10 @@ public class OrderServiceImpl implements OrderService {
     private final CartService carts;
     private final ProductService products;
     private final QuoteService quotes;
-    public OrderServiceImpl(OrderRepository repository, CartService carts, ProductService products, QuoteService quotes) {
-        this.repository = repository; this.carts = carts; this.products = products; this.quotes = quotes;
+    private final AccountService accounts;
+    private final CouponService coupons;
+    public OrderServiceImpl(OrderRepository repository, CartService carts, ProductService products, QuoteService quotes, AccountService accounts, CouponService coupons) {
+        this.repository = repository; this.carts = carts; this.products = products; this.quotes = quotes; this.accounts = accounts; this.coupons = coupons;
     }
     @Override
     @Transactional
@@ -43,22 +47,25 @@ public class OrderServiceImpl implements OrderService {
         String requestHash = requestHash(checkout);
         Optional<Order> previous = repository.findByKey(cartId, checkout.idempotencyKey());
         if (previous.isPresent()) {
+            requireOwnership(previous.get(), cartId);
             if (!previous.get().requestHash().equals(requestHash)) {
                 throw new ShopException(409, "This checkout key was already used for a different request.");
             }
             return previous.get();
         }
         if (cart.lines().isEmpty()) { throw new ShopException(409, "Your cart is empty."); }
+        UUID accountId = accounts.lockCurrent();
         List<Product> lockedProducts = products.lockProducts(cart.lines());
-        Quote quote = quotes.calculate(cart.lines(), lockedProducts);
+        Quote quote = coupons.apply(quotes.calculate(cart.lines(), lockedProducts), cart.couponCode(), true);
         if (!quote.fingerprint().equals(checkout.quoteFingerprint())) {
             throw new ShopException(409, "Your cart or its price has changed. Review your cart before ordering.");
         }
         products.reserve(cart.lines(), lockedProducts);
+        coupons.redeem(cart.couponCode());
         Instant now = Instant.now();
         Order order = repository.save(new Order(UUID.randomUUID(), cartId, checkout.idempotencyKey(), requestHash,
                 checkout.customer(), quote.lines(), quote.subtotal(), quote.shipping(), quote.total(),
-                quote.currency(), OrderStatus.PLACED, now, now));
+                quote.currency(), OrderStatus.PLACED, now, now, accountId, quote.couponCode(), quote.discount()));
         carts.clear(cartId);
         LOG.atInfo().addKeyValue("orderId", order.id()).addKeyValue("status", order.status()).log("Order placed");
         return order;
@@ -66,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order findForCustomer(UUID cartId, UUID orderId) {
         Order order = repository.find(orderId);
-        if (!order.cartId().equals(cartId)) { throw new ShopException(404, "Order not found."); }
+        requireOwnership(order, cartId);
         return order;
     }
     @Override
@@ -93,6 +100,14 @@ public class OrderServiceImpl implements OrderService {
         Order updated = repository.transition(id, next, actor);
         LOG.atInfo().addKeyValue("orderId", id).addKeyValue("status", next).addKeyValue("actor", actor).log("Order processed");
         return updated;
+    }
+    @Override @PreAuthorize("hasRole('CUSTOMER')") public List<Order> listMine(int page) {
+        if (page < 0 || page > 100000) throw new ShopException(400, "Invalid page number.");
+        return repository.listByAccount(accounts.current().id(), page);
+    }
+    private void requireOwnership(Order order, UUID cartId) {
+        boolean owned = order.accountId() == null ? order.cartId().equals(cartId) : order.accountId().equals(accounts.currentId());
+        if (!owned) throw new ShopException(404, "Order not found.");
     }
     private String requestHash(Checkout checkout) {
         Customer c = checkout.customer();

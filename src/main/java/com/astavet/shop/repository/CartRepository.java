@@ -8,4 +8,5 @@ import java.util.UUID;
 public interface CartRepository {
     Cart lock(UUID id);
     void replaceLines(UUID id, List<CartLine> lines);
+    void setCoupon(UUID id, String code);
 }

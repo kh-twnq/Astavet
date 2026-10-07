@@ -13,4 +13,6 @@ public interface OrderRepository {
     List<Order> list(int page);
     Order save(Order order);
     Order transition(UUID id, OrderStatus next, String actor);
+    List<Order> listByAccount(UUID accountId, int page);
+    boolean hasDelivered(UUID accountId, UUID productId);
 }

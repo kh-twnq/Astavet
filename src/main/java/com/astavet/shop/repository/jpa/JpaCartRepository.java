@@ -1,6 +1,6 @@
 package com.astavet.shop.repository.jpa;
 
-import com.astavet.shop.repository.entity.CartEntity;
+import com.astavet.shop.entity.CartEntity;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.util.UUID;

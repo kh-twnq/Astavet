@@ -1,4 +1,4 @@
-package com.astavet.shop.repository.entity;
+package com.astavet.shop.entity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;

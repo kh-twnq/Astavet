@@ -1,5 +1,7 @@
 package com.astavet.shop.domain;
 
+import com.astavet.shop.exception.ShopException;
+
 import java.math.BigDecimal;
 import java.util.UUID;
 

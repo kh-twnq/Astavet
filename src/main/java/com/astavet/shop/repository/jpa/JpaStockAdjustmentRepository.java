@@ -1,5 +1,5 @@
 package com.astavet.shop.repository.jpa;
-import com.astavet.shop.repository.entity.StockAdjustmentEntity;
+import com.astavet.shop.entity.StockAdjustmentEntity;
 import java.util.UUID;
 import java.util.List;
 import java.util.Optional;

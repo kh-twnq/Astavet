@@ -1,6 +1,6 @@
 package com.astavet.shop.service.impl;
 import com.astavet.shop.domain.Product;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.domain.StockAdjustment;
 import com.astavet.shop.repository.ProductRepository;
 import com.astavet.shop.service.CatalogueAdminService;

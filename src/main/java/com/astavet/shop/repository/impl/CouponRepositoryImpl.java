@@ -1,7 +1,7 @@
 package com.astavet.shop.repository.impl;
 import com.astavet.shop.domain.Coupon;
 import com.astavet.shop.repository.CouponRepository;
-import com.astavet.shop.repository.entity.CouponEntity;
+import com.astavet.shop.entity.CouponEntity;
 import com.astavet.shop.repository.jpa.JpaCouponRepository;
 import java.util.List;
 import java.util.Optional;

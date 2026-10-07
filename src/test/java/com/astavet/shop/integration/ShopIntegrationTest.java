@@ -1,16 +1,20 @@
-package com.astavet.shop;
+package com.astavet.shop.integration;
 
 import com.astavet.shop.domain.Checkout;
 import com.astavet.shop.domain.Customer;
 import com.astavet.shop.domain.Order;
 import com.astavet.shop.domain.OrderStatus;
 import com.astavet.shop.domain.Quote;
-import com.astavet.shop.domain.ShopException;
-import com.astavet.shop.repository.entity.ProductEntity;
+import com.astavet.shop.exception.ShopException;
+import com.astavet.shop.entity.ProductEntity;
 import com.astavet.shop.service.CartService;
 import com.astavet.shop.service.OrderService;
 import com.astavet.shop.service.ProductService;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import org.hibernate.SessionFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import java.time.Instant;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +58,8 @@ class ShopIntegrationTest {
     @Autowired OrderService orders;
     @Autowired ProductService products;
     @Autowired EntityManager entityManager;
+    @Autowired EntityManagerFactory entityManagerFactory;
+    @Autowired JdbcTemplate jdbc;
     @Autowired TransactionTemplate transactions;
     @Autowired MockMvc mvc;
     @Autowired com.astavet.shop.service.AccountService accounts;
@@ -505,6 +511,101 @@ class ShopIntegrationTest {
         assertThat(results.stream().filter(List.class::isInstance)).hasSize(1);
         assertThat(products.find(PRODUCT).stock()).isEqualTo(99);
         assertThat(as("a@example.test", "CUSTOMER", () -> community.wishlist())).hasSize(1);
+    }
+    @Test
+    void orderPagesFetchAllLinesInTwoQueriesAndPreserveAccountIsolation() {
+        UUID account = accounts.register("page@example.test", "Page", "long-test-password").id();
+        UUID other = accounts.register("other@example.test", "Other", "long-test-password").id();
+        UUID secondProduct = seedProducts(1).getFirst();
+        UUID cart = UUID.randomUUID();
+        jdbc.update("insert into carts(id) values (?)", cart);
+        List<UUID> expected = new ArrayList<>();
+        for (int i = 0; i < 26; i++) {
+            UUID id = new UUID(0, 1000 + i);
+            expected.add(id);
+            seedOrder(id, cart, account, secondProduct);
+        }
+        seedOrder(new UUID(0, 999), cart, other, secondProduct);
+        List<Order> first = measured(2, () -> as("admin", "ADMIN", () -> orders.list(0)));
+        List<UUID> all = new ArrayList<>(); all.add(new UUID(0, 999)); all.addAll(expected);
+        assertThat(first).extracting(Order::id).containsExactlyElementsOf(all.subList(0, 25));
+        assertThat(first).allSatisfy(order -> assertThat(order.lines()).hasSize(2));
+        assertThat(measured(2, () -> as("admin", "ADMIN", () -> orders.list(1))))
+                .extracting(Order::id).containsExactlyElementsOf(all.subList(25, 27));
+        assertThat(measured(1, () -> as("admin", "ADMIN", () -> orders.list(2)))).isEmpty();
+        List<Order> own = measured(3, () -> as("page@example.test", "CUSTOMER", () -> orders.listMine(0)));
+        assertThat(own).extracting(Order::id).containsExactlyElementsOf(expected.subList(0, 25));
+        assertThat(own).allSatisfy(order -> assertThat(order.lines()).hasSize(2));
+        assertThat(measured(3, () -> as("page@example.test", "CUSTOMER", () -> orders.listMine(1))))
+                .extracting(Order::id).containsExactly(expected.getLast());
+    }
+    @Test
+    void wishlistBatchReadHasConstantQueryCountAndKeepsSavedOrder() {
+        UUID account = accounts.register("batch@example.test", "Batch", "long-test-password").id();
+        accounts.register("empty@example.test", "Empty", "long-test-password");
+        List<UUID> ids = seedProducts(25);
+        for (int i = 0; i < ids.size(); i++) {
+            jdbc.update("insert into wishlists(id,account_id,product_id,created_at) values(?,?,?,?)",
+                    UUID.randomUUID(), account, ids.get(i), java.sql.Timestamp.from(Instant.parse("2026-01-01T00:00:00Z").plusSeconds(i)));
+        }
+        List<UUID> reversed = ids.reversed();
+        assertThat(measured(3, () -> as("batch@example.test", "CUSTOMER", () -> community.wishlist())))
+                .extracting(com.astavet.shop.domain.Product::id).containsExactlyElementsOf(reversed);
+        assertThat(measured(2, () -> as("empty@example.test", "CUSTOMER", () -> community.wishlist()))).isEmpty();
+        assertThat(products.findAll(List.of(ids.getLast(), PRODUCT, ids.getFirst(), ids.getLast())))
+                .extracting(com.astavet.shop.domain.Product::id).containsExactly(ids.getLast(), PRODUCT, ids.getFirst(), ids.getLast());
+        assertThatThrownBy(() -> products.findAll(List.of(UUID.randomUUID()))).isInstanceOf(ShopException.class).hasMessage("Product not found.");
+    }
+    @Test
+    void publicCatalogueIsBoundedSearchableAndDetailsReachLaterPages() throws Exception {
+        List<UUID> ids = seedProducts(26);
+        jdbc.update("update products set active=false where id=?", ids.get(24));
+        mvc.perform(get("/api/v1/products")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(25));
+        mvc.perform(get("/api/v1/products").param("page", "1")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].id").value(ids.getLast().toString()));
+        mvc.perform(get("/api/v1/products").param("q", "ZZ fixture")).andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(ids.getFirst().toString())).andExpect(jsonPath("$.length()").value(25));
+        jdbc.update("update products set name='ZZ 100%_literal' where id=?", ids.getLast());
+        mvc.perform(get("/api/v1/products").param("q", "%_")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].id").value(ids.getLast().toString()));
+        mvc.perform(get("/api/v1/products/by-slug/fixture-25")).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(ids.getLast().toString()));
+        mvc.perform(get("/api/v1/products/by-slug/fixture-24")).andExpect(status().isNotFound());
+        mvc.perform(get("/api/v1/products").param("page", "-1")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/products").param("page", "100001")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/products").param("q", "x".repeat(101))).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/products/lookup").param("ids", ids.getLast() + "," + ids.get(24)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(1));
+        mvc.perform(get("/api/v1/products/lookup").param("ids", String.join(",", java.util.Collections.nCopies(51, PRODUCT.toString()))))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/products/lookup")).andExpect(status().isBadRequest());
+        mvc.perform(get("/api/v1/products/lookup").param("ids", "invalid")).andExpect(status().isBadRequest());
+    }
+    private List<UUID> seedProducts(int count) {
+        List<UUID> ids = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            UUID id = new UUID(0, 100 + i); ids.add(id);
+            jdbc.update("insert into products(id,slug,name,description,price,currency,stock,active,image_path) values (?,?,?,'Fixture',10,'AUD',100,true,'/assets/product-placeholder.svg')",
+                    id, "fixture-" + i, "ZZ fixture");
+        }
+        return ids;
+    }
+    private void seedOrder(UUID id, UUID cart, UUID account, UUID secondProduct) {
+        jdbc.update("insert into customer_orders (id,cart_id,idempotency_key,request_hash,customer_name,email,phone,address,city,postcode,state,subtotal,shipping,gross_total,total,currency,payment_method,status,created_at,updated_at,account_id) values (?,?,?,?,'Fixture','fixture@example.test','12345678','Test','Test','2000','NSW',20,0,20,20,'AUD','COD','PLACED',?,?,?)",
+                id, cart, UUID.randomUUID(), "a".repeat(64), java.sql.Timestamp.from(Instant.parse("2026-01-01T00:00:00Z")), java.sql.Timestamp.from(Instant.parse("2026-01-01T00:00:00Z")), account);
+        for (UUID productId : List.of(PRODUCT, secondProduct)) {
+            jdbc.update("insert into order_lines(id,order_id,product_id,name,unit_price,quantity) values(?,?,?,'Snapshot',10,1)", UUID.randomUUID(), id, productId);
+        }
+    }
+    private <T> T measured(long queries, java.util.function.Supplier<T> action) {
+        var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
+        boolean enabled = statistics.isStatisticsEnabled();
+        statistics.setStatisticsEnabled(true); statistics.clear();
+        try {
+            T value = action.get();
+            assertThat(statistics.getPrepareStatementCount()).isEqualTo(queries);
+            assertThat(statistics.getCollectionFetchCount()).isZero();
+            return value;
+        } finally { statistics.setStatisticsEnabled(enabled); }
     }
     private <T> T as(String name, String role, java.util.function.Supplier<T> action) {
         var previous = SecurityContextHolder.getContext().getAuthentication();

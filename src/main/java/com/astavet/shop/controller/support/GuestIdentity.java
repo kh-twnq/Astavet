@@ -1,4 +1,4 @@
-package com.astavet.shop.controller.v1;
+package com.astavet.shop.controller.support;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.UUID;

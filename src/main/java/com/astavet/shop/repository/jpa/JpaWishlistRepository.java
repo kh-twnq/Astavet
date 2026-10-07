@@ -1,5 +1,5 @@
 package com.astavet.shop.repository.jpa;
-import com.astavet.shop.repository.entity.WishlistEntity;
+import com.astavet.shop.entity.WishlistEntity;
 import java.util.UUID;
 import java.util.List;
 import java.util.Optional;

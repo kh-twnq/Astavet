@@ -1,4 +1,4 @@
-package com.astavet.shop;
+package com.astavet.shop.domain;
 
 import com.astavet.shop.domain.OrderStatus;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.astavet.shop;
+package com.astavet.shop.service;
 
 import com.astavet.shop.domain.CartLine;
 import com.astavet.shop.domain.Product;

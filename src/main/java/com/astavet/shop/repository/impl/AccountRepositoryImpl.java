@@ -1,8 +1,8 @@
 package com.astavet.shop.repository.impl;
 import com.astavet.shop.domain.Account;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.repository.AccountRepository;
-import com.astavet.shop.repository.entity.AccountEntity;
+import com.astavet.shop.entity.AccountEntity;
 import com.astavet.shop.repository.jpa.JpaAccountRepository;
 import java.util.Optional;
 import java.util.UUID;

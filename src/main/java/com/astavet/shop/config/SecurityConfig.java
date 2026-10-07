@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/account/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/v1/products", "/api/v1/products/*/reviews", "/api/v1/csrf", "/api/v1/session", "/api/v1/accounts",
+                        .requestMatchers("/api/v1/products", "/api/v1/products/by-slug/*", "/api/v1/products/lookup", "/api/v1/products/*/reviews", "/api/v1/csrf", "/api/v1/session", "/api/v1/accounts",
                                 "/api/v1/cart", "/api/v1/cart/lines", "/api/v1/cart/coupon", "/api/v1/orders", "/api/v1/orders/*", "/error").permitAll()
                         .anyRequest().denyAll())
                 .formLogin(login -> login.loginPage("/login").loginProcessingUrl("/login")

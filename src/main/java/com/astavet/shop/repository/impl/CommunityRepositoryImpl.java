@@ -1,10 +1,10 @@
 package com.astavet.shop.repository.impl;
 import com.astavet.shop.domain.Review;
 import com.astavet.shop.domain.ReviewStatus;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.repository.CommunityRepository;
-import com.astavet.shop.repository.entity.WishlistEntity;
-import com.astavet.shop.repository.entity.ReviewEntity;
+import com.astavet.shop.entity.WishlistEntity;
+import com.astavet.shop.entity.ReviewEntity;
 import com.astavet.shop.repository.jpa.JpaWishlistRepository;
 import com.astavet.shop.repository.jpa.JpaReviewRepository;
 import java.time.Instant;

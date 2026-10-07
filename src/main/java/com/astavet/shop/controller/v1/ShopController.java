@@ -1,5 +1,7 @@
 package com.astavet.shop.controller.v1;
 
+import com.astavet.shop.controller.support.GuestIdentity;
+
 import com.astavet.shop.dto.CartResponse;
 import com.astavet.shop.dto.SetCouponRequest;
 import com.astavet.shop.dto.CreateOrderRequest;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -36,7 +39,15 @@ public class ShopController {
     @GetMapping("/csrf")
     public Map<String, String> csrf(CsrfToken token) { return Map.of("token", token.getToken(), "headerName", token.getHeaderName()); }
     @GetMapping("/products")
-    public List<ProductResponse> products() { return products.list().stream().map(ProductResponse::from).toList(); }
+    public List<ProductResponse> products(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "") String q) {
+        return products.list(page, q).stream().map(ProductResponse::from).toList();
+    }
+    @GetMapping("/products/by-slug/{slug}")
+    public ProductResponse product(@PathVariable String slug) { return ProductResponse.from(products.findActiveBySlug(slug)); }
+    @GetMapping("/products/lookup")
+    public List<ProductResponse> selected(@RequestParam(required = false) List<UUID> ids) {
+        return products.selected(ids).stream().map(ProductResponse::from).toList();
+    }
     @GetMapping("/cart")
     public CartResponse cart(HttpSession session) { return CartResponse.from(carts.view(identity.cartId(session))); }
     @PutMapping("/cart/lines")

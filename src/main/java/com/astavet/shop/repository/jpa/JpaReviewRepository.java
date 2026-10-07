@@ -1,6 +1,6 @@
 package com.astavet.shop.repository.jpa;
 import com.astavet.shop.domain.ReviewStatus;
-import com.astavet.shop.repository.entity.ReviewEntity;
+import com.astavet.shop.entity.ReviewEntity;
 import jakarta.persistence.LockModeType;
 import java.util.UUID;
 import java.util.Optional;

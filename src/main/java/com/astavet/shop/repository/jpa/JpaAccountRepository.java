@@ -1,5 +1,5 @@
 package com.astavet.shop.repository.jpa;
-import com.astavet.shop.repository.entity.AccountEntity;
+import com.astavet.shop.entity.AccountEntity;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package com.astavet.shop.domain;
+package com.astavet.shop.exception;
 
 public class ShopException extends RuntimeException {
     private final int status;

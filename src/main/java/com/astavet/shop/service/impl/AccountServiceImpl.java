@@ -1,6 +1,6 @@
 package com.astavet.shop.service.impl;
 import com.astavet.shop.domain.Account;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.repository.AccountRepository;
 import com.astavet.shop.service.AccountService;
 import java.nio.charset.StandardCharsets;

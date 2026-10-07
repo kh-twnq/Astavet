@@ -5,7 +5,7 @@ import com.astavet.shop.domain.Digests;
 import com.astavet.shop.domain.OrderLine;
 import com.astavet.shop.domain.Product;
 import com.astavet.shop.domain.Quote;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.service.QuoteService;
 import java.math.BigDecimal;
 import java.util.Comparator;

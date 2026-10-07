@@ -3,8 +3,8 @@ package com.astavet.shop.repository.impl;
 import com.astavet.shop.domain.Customer;
 import com.astavet.shop.domain.Order;
 import com.astavet.shop.domain.OrderLine;
-import com.astavet.shop.repository.entity.OrderEntity;
-import com.astavet.shop.repository.entity.OrderLineEntity;
+import com.astavet.shop.entity.OrderEntity;
+import com.astavet.shop.entity.OrderLineEntity;
 import java.util.UUID;
 
 final class OrderMapper {

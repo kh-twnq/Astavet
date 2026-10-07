@@ -1,6 +1,6 @@
 package com.astavet.shop.repository.jpa;
 
-import com.astavet.shop.repository.entity.ProductEntity;
+import com.astavet.shop.entity.ProductEntity;
 import jakarta.persistence.LockModeType;
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface JpaProductRepository extends JpaRepository<ProductEntity, UUID> {
-    List<ProductEntity> findByActiveTrueOrderByNameAsc();
+    List<ProductEntity> findByActiveTrueAndNameContainingIgnoreCaseOrderByNameAscIdAsc(String name, org.springframework.data.domain.Pageable pageable);
+    Optional<ProductEntity> findBySlugAndActiveTrue(String slug);
     org.springframework.data.domain.Page<ProductEntity> findAllByOrderByNameAscIdAsc(org.springframework.data.domain.Pageable pageable);
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from ProductEntity p where p.id = :id")

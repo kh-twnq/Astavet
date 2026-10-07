@@ -1,4 +1,4 @@
-package com.astavet.shop.repository.entity;
+package com.astavet.shop.entity;
 import com.astavet.shop.domain.ReviewStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;

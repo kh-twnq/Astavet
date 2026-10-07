@@ -9,7 +9,7 @@ import com.astavet.shop.domain.Order;
 import com.astavet.shop.domain.OrderStatus;
 import com.astavet.shop.domain.Product;
 import com.astavet.shop.domain.Quote;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.repository.OrderRepository;
 import com.astavet.shop.service.CartService;
 import com.astavet.shop.service.AccountService;

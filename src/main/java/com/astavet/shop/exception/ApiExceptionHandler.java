@@ -1,6 +1,5 @@
-package com.astavet.shop.controller.v1;
+package com.astavet.shop.exception;
 
-import com.astavet.shop.domain.ShopException;
 import jakarta.validation.ConstraintViolationException;
 import java.util.Map;
 import org.slf4j.Logger;

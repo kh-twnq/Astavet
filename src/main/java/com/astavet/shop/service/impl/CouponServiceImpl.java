@@ -1,5 +1,5 @@
 package com.astavet.shop.service.impl;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.domain.Quote;
 import com.astavet.shop.domain.Coupon;
 import com.astavet.shop.domain.Digests;

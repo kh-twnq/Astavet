@@ -1,4 +1,4 @@
-package com.astavet.shop.repository.entity;
+package com.astavet.shop.entity;
 
 import com.astavet.shop.domain.OrderStatus;
 import jakarta.persistence.Column;

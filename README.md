@@ -6,6 +6,12 @@ Customer flow: product catalogue/detail → server-backed bag → Australian del
 
 The design and initial product are based on [the supplied AstaVet reference](https://www.astavet.com/products/astaxanthin-200g). Its title is **AstaVet 130g**, although its URL says 200g. The seeded **AUD 49.00 price and 100 units are provisional demo data**, since the reference is sold out and does not expose a usable price. Shipping is provisionally AUD 7.95, free from AUD 100.00. The frontend uses reference packaging photography. Confirm catalogue, fulfilment terms, taxes, branding rights and imagery before opening the shop to customers. No email notifications are sent.
 
+## Project structure
+
+Use conventional layer packages: `controller/`, `service/`, `repository/`, `dto/`, `domain/`, `entity/`, `config/`, `exception/`. Service/repository interfaces retain their `impl/` implementations; HTTP endpoints remain in `controller/v1/`, and Spring Data repositories in `repository/jpa/`. Entities are persistence-only types even though they now have a top-level package.
+
+See [the package map and dependency boundaries](docs/structure.md). Tests are grouped into `domain/`, `service/`, `integration/`. Frontend screens live in the separate [React repository](../astavet-frontend/README.md).
+
 ## Run
 
 Requirements: Java 21 and PostgreSQL. The independent frontend requires Node 22.12+. The Gradle wrapper downloads Gradle/dependencies on its first run.
@@ -58,7 +64,9 @@ The backend serves APIs at `http://localhost:8080`. In `../astavet-frontend`, ru
 | --- | --- | --- |
 | POST | `/login` | Form username/password and CSRF; 204 success, 401 invalid credentials |
 | POST | `/logout` | CSRF required; 204 success |
-| GET | `/api/v1/products` | Active catalogue |
+| GET | `/api/v1/products?page=0&q=` | Active catalogue, 25 per page ordered by name/UUID; literal case-insensitive name search (100 characters maximum) |
+| GET | `/api/v1/products/by-slug/{slug}` | Active product detail, independent of catalogue page |
+| GET | `/api/v1/products/lookup?ids={comma-separated-UUIDs}` | Active product metadata for 1–50 IDs (cart images); archived products omitted |
 | GET | `/api/v1/csrf` | Masked session token and header name |
 | GET | `/api/v1/cart` | Session bag, current totals and fingerprint |
 | PUT | `/api/v1/cart/lines` | `{productId, quantity}`; quantity 0 removes a line |

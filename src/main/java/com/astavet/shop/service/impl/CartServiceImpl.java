@@ -4,7 +4,7 @@ import com.astavet.shop.domain.Cart;
 import com.astavet.shop.domain.CartLine;
 import com.astavet.shop.domain.Product;
 import com.astavet.shop.domain.Quote;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.repository.CartRepository;
 import com.astavet.shop.service.CartService;
 import com.astavet.shop.service.CouponService;

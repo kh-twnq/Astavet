@@ -2,7 +2,7 @@ package com.astavet.shop.service.impl;
 import com.astavet.shop.domain.Review;
 import com.astavet.shop.domain.Product;
 import com.astavet.shop.domain.ReviewStatus;
-import com.astavet.shop.domain.ShopException;
+import com.astavet.shop.exception.ShopException;
 import com.astavet.shop.domain.Account;
 import com.astavet.shop.repository.OrderRepository;
 import com.astavet.shop.repository.CommunityRepository;
@@ -56,6 +56,6 @@ public class CommunityServiceImpl implements CommunityService {
         if (old.status() != expected || old.version() != expectedVersion) throw new ShopException(409, "Review changed. Refresh before moderation.");
         return repository.saveReview(new Review(old.id(), old.accountId(), old.productId(), old.authorName(), old.rating(), old.body(), status, old.createdAt(), Instant.now(), old.version()));
     }
-    private List<Product> wishes(UUID accountId) { return repository.wishlist(accountId).stream().map(products::find).toList(); }
+    private List<Product> wishes(UUID accountId) { return products.findAll(repository.wishlist(accountId)); }
     private void requirePage(int page) { if (page < 0 || page > 100000) throw new ShopException(400, "Invalid page number."); }
 }
